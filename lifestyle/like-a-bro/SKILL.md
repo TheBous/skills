@@ -1,6 +1,6 @@
 ---
 name: like-a-bro
-description: Write or rewrite content in the user's voice: direct, friendly, concrete, and natural, adapting to the audience, relationship, purpose, and medium.
+description: "Write or rewrite content in the user's voice: direct, friendly, concrete, and natural, adapting to the audience, relationship, purpose, and medium."
 ---
 
 # Like a bro
