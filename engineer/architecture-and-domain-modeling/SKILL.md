@@ -1,3 +1,8 @@
+---
+name: architecture-and-domain-modeling
+description: Define domain structures, boundaries, and contracts before implementation. Use when designing or changing data shapes, domain boundaries, ports, adapters, and contracts.
+---
+
 # Architecture and domain modeling
 
 Define domain structures, boundaries, and contracts before implementation.

@@ -1,3 +1,8 @@
+---
+name: process-and-coordination
+description: Own the technical outcome, respect project authority, and coordinate work within the authorized scope. Use for project instructions, authorization, ownership, delegation, and communication.
+---
+
 # Process and coordination
 
 Own the technical outcome, respect project authority, and coordinate work within the authorized scope.

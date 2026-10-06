@@ -1,3 +1,8 @@
+---
+name: code-quality-and-maintainability
+description: Keep code readable, cohesive, and within the structural limits. Use when writing or reviewing code conventions, file and function size, cleanup, and comments.
+---
+
 # Code quality and maintainability
 
 Keep code readable, cohesive, and within the structural limits.

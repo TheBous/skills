@@ -1,3 +1,8 @@
+---
+name: verification-and-review
+description: Prove behavior on the real artifact and keep required review gates closed until there is evidence. Use for bug reproduction, behavioral tests, runtime checks, evidence, and independent review.
+---
+
 # Verification and review
 
 Prove behavior on the real artifact and keep required review gates closed until there is evidence.

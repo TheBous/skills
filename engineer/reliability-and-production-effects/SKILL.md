@@ -1,3 +1,8 @@
+---
+name: reliability-and-production-effects
+description: Make errors explicit and keep production effects safe across retries, crashes, and concurrent requests. Use for error handling, concurrency, idempotency, retries, and reconciliation.
+---
+
 # Reliability and production effects
 
 Make errors explicit and keep production effects safe across retries, crashes, and concurrent requests.

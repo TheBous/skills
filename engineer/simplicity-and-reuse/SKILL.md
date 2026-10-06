@@ -1,3 +1,8 @@
+---
+name: simplicity-and-reuse
+description: Build only what is needed, reuse existing concepts, and fix the cause with the smallest sound change. Use when adding code, dependencies, or abstractions, and when searching the project for existing helpers, types, and constants.
+---
+
 # Simplicity and reuse
 
 Build only what is needed, reuse existing concepts, and fix the cause with the smallest sound change.
