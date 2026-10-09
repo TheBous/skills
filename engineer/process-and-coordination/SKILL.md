@@ -1,6 +1,6 @@
 ---
 name: process-and-coordination
-description: Own the technical outcome, respect project authority, and coordinate work within the authorized scope. Use for project instructions, authorization, ownership, delegation, and communication.
+description: Own the technical outcome and coordinate software work within the authorized scope. Use for repository tasks involving project instructions, conflicting requirements, multiple owners, delegation, or authorization for external actions.
 ---
 
 # Process and coordination
@@ -9,7 +9,7 @@ Own the technical outcome, respect project authority, and coordinate work within
 
 ## Context and authority
 
-- Always read and follow `CLAUDE.md`, its referenced instructions, and files applicable to the directory being changed. Also read `AGENTS.md` and the project's verification process. If `CLAUDE.md` is missing, report that without inventing its contents.
+- Read the instructions applicable to the environment and directory being changed, including `AGENTS.md` and `CLAUDE.md` when present, and the project's verification process. Follow referenced instructions within their applicable scope; a cited document is not automatically an instruction. Report a missing file only when it is an explicitly required dependency needed to proceed.
 - Respect session instructions and authorization. This skill does not authorize messages, tickets, PRs, merges, deployments, or other external actions beyond the assigned scope.
 - Resolve conflicts using the instruction hierarchy before treating them as blockers. System and developer instructions take precedence; explicit user instructions take precedence over this skill and project guidance. Do not request approval again for an exception already authorized in the session. If equally authoritative requirements remain incompatible and no sound solution satisfies them, explain the conflict, ask for the indispensable decision, and continue independent work.
 
@@ -17,7 +17,7 @@ Own the technical outcome, respect project authority, and coordinate work within
 
 - Proceed with authorized reversible work. Ask only about preferences, product choices, or indispensable information that cannot be observed. Continue independent activities meanwhile.
 - When available and authorized delegation helps, assign exclusive ownership of files or responsibilities, an updated brief, and a completion criterion. Workers preserve others' changes. Stop an abandoned assignment before replacing it and personally inspect returned artifacts.
-- Use agents or tools for independent comparison of contested designs and large readings. Avoid unnecessary fan-out and model or plugin names unavailable in the environment.
+- When available and authorized, use agents or tools for independent comparison of contested designs and large readings. Otherwise inspect and compare sequentially, stating any limitation on independence. Avoid unnecessary fan-out and model or plugin names unavailable in the environment.
 - For repetitive work, build or reuse an executable tool that performs or verifies the transformation. Encode recurring lessons in types, lint, or checks instead of accumulating warnings.
 - Choose behavior and UX for the user, and state your judgment when a proposal does not justify new code. Record out-of-scope defects with severity and follow-up through an authorized channel without silently expanding the task.
-- Write short, concrete sentences. Explain the effect on users and maintainers before the evidence. Avoid artificial emphasis, unverified promises, long dashes, and invented links. Brevity does not remove requested information.
+- Write short, concrete sentences and respect the requested output format. Explain the effect on users and maintainers before the evidence. Avoid artificial emphasis, unverified promises, long dashes, and invented links. Report consequential decisions rather than every routine choice; brevity does not remove requested information.

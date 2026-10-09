@@ -1,6 +1,6 @@
 ---
 name: engineering-manager
-description: Guide code design, implementation, and review as an engineering manager. Use for features, bug fixes, and refactoring that require sound architecture, simplicity, idempotency, and demonstrable verification.
+description: Own software delivery from analysis through implementation and verification. Use for features, bug fixes, and refactoring that require coordinating multiple steps or technical concerns. Apply architecture, simplicity, and effect reliability where relevant; use the specialist skills for narrowly scoped questions.
 ---
 
 # Engineering manager
@@ -22,4 +22,12 @@ Install and distribute this skill together with all six skills listed below, kee
 
 ## Cross-cutting rule
 
-Never use fragile hacks, unstable workarounds, specification gaming, or reward hacking. Respect the purpose of each rule. Never disable tests, weaken assertions, inflate metrics, hide errors, add wrappers to lower LOC, or claim success without evidence. If a constraint prevents a sound solution, demonstrate the conflict and report the blocker rather than producing apparent compliance.
+Never use fragile hacks, unstable workarounds, specification gaming, or reward hacking. Respect the purpose of each rule. Never disable tests, weaken assertions, inflate metrics, hide errors, add wrappers to lower LOC, or claim success without evidence. Resolve instruction precedence using process-and-coordination before treating a conflict as a blocker. If no sound authorized solution remains, demonstrate the conflict and report it rather than producing apparent compliance.
+
+## Workflow
+
+1. Understand the requested outcome, scope, applicable instructions, and acceptance criteria.
+2. Trace the affected flow and select the rules relevant to its risks; explain consequential design decisions.
+3. Execute authorized work in verifiable units, coordinating ownership when delegation is available and authorized.
+4. Run the required checks, inspect the final artifact, and assess required review gates against the final revision.
+5. Report the result, evidence, and any unresolved limitation or blocker. Do not present partial work as complete.

@@ -1,0 +1,48 @@
+{
+  "skill_name": "engineering-manager",
+  "evals": [
+    {
+      "id": 1,
+      "name": "command-invariants",
+      "prompt": "Sei responsabile della soluzione tecnica di un servizio TypeScript. Non hai un repository applicativo da modificare: produci una decisione tecnica concreta, non fingere test eseguiti. Il comando prenotaPosto deve verificare titolarità e disponibilità nel DB, impedire overbooking tra richieste concorrenti e restituire l'ID della prenotazione secondo il contratto pubblico. Esiste una transazione DB e una constraint univoca adeguata. Nessun servizio esterno coinvolto. Un consumer nello stesso monorepo viene distribuito indipendentemente e usa ancora la precedente API. Una funzione pura formatta l'ID già validato. Descrivi flusso, forma dei ritorni, eventuali nuove astrazioni, migrazione e verifiche. Output in italiano, massimo 650 parole.",
+      "expected_output": "Comando legge e muta coerentemente; ritorno ID preservato; funzione totale diretta; nessun ledger inutile; migrazione compatibile.",
+      "files": [],
+      "expectations": [
+        "Il comando legge titolarità e disponibilità mantenendo verifica e scrittura coerenti sotto concorrenza.",
+        "Il ritorno pubblico mantiene l'ID della prenotazione e la funzione totale ritorna direttamente il valore.",
+        "Non introduce un registro di idempotenza o nuove interfacce prive di necessità per questo caso.",
+        "La migrazione preserva il consumer con deploy indipendente e definisce una condizione di rimozione della vecchia API.",
+        "Distingue verifiche proposte da verifiche realmente eseguite."
+      ]
+    },
+    {
+      "id": 2,
+      "name": "legacy-scope",
+      "prompt": "Sei responsabile di un bugfix TypeScript. Non hai un repository applicativo da modificare: produci una decisione concreta e non fingere controlli eseguiti. Fatti del progetto: solo AGENTS.md, nessun CLAUDE.md; AGENTS non impone review indipendente. In un handler legacy di 45 righe devi correggere un confronto da > a >= senza aggiungere responsabilità né peggiorare la complessità. La nuova PR, iniziata in una chat precedente, aggiunge anche un altro file sorgente di 220 righe che non esiste al commit base; riprendi il task nella chat attuale. Nessun analizzatore di complessità configurato, metriche non richieste dalla CI. Typecheck e test sono disponibili ma la build obbligatoria è bloccata da un registry non raggiungibile. Spiega quali interventi e verifiche sono necessari, se la ripresa cambia lo status del file, e cosa puoi dichiarare concluso. Output in italiano, massimo 650 parole.",
+      "expected_output": "Bugfix legacy circoscritto; file nuovo rispetto base resta nuovo; nessun blocco per CLAUDE o analyzer; build mandatory irrisolta => consegna parziale.",
+      "files": [],
+      "expectations": [
+        "La modifica minima al legacy non obbliga a rifare l'handler solo per le 45 righe preesistenti.",
+        "Il file di 220 righe resta nuovo rispetto alla base e richiede una scomposizione coesa senza aggirare il limite cambiando chat.",
+        "Non inventa un blocco per CLAUDE.md assente, analyzer assente o review indipendente non richiesta.",
+        "La build obbligatoria non eseguibile rimane un gate irrisolto e l'esito è dichiarato parziale.",
+        "Non inventa controlli realmente eseguiti."
+      ]
+    },
+    {
+      "id": 3,
+      "name": "provider-uncertainty",
+      "prompt": "Sei responsabile del protocollo TypeScript per un addebito esterno. Non implementare codice né contattare servizi: produci decisioni concrete, massimo 750 parole in italiano. Il DB ha già un registro atomico per tenant/chiave. Il provider supporta idempotenza per 24 ore. Dopo l'invio un worker riceve timeout, può continuare ad agire anche dopo la scadenza della propria lease, e un secondo worker riceve un replay. Il chiamante può riprovare per 72 ore. Due payload JSON con gli stessi campi in ordine diverso sono equivalenti; cambiare amount cambia l'effetto, e un default versionato può modificarne il significato. Definisci fingerprint, risposte al replay pendente e terminale, gestione dei crash e worker scaduti, retention, riconciliazione e verifiche necessarie. Il progetto usa Promise rejection pubbliche e nessun Result: spiega come gestire gli errori senza rompere tale contratto.",
+      "expected_output": "Fingerprint semantico; replay espliciti; lease non autorizza doppio effetto; gap retention24/72 gestito; errors compatibili.",
+      "files": [],
+      "expectations": [
+        "Il fingerprint usa i campi normalizzati rilevanti e considera ordine JSON, amount, default e versione.",
+        "Distingue replay terminale, pendente e incerto senza inventare successo o riapplicare l'effetto.",
+        "Una lease scaduta non autorizza da sola un altro addebito e il protocollo considera worker obsoleti.",
+        "Il divario tra garanzia provider di 24h e retry di 72h è trattato esplicitamente senza presumere protezione indefinita.",
+        "Preserva le Promise rejection pubbliche senza imporre Result ai caller e rende gli errori distinguibili.",
+        "Propone verifiche rilevanti senza dichiarare test eseguiti."
+      ]
+    }
+  ]
+}
