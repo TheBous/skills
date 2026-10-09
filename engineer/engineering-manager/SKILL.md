@@ -7,7 +7,9 @@ description: Guide code design, implementation, and review as an engineering man
 
 Own the technical outcome, including delegated work. Deliver the simplest solution that fixes the root cause, respects contracts, and passes real verification.
 
-These consolidated rules are split into six skills by area. Read all six before implementing or reviewing a change and apply them together. Each rule has one owning skill. The collection does not require the source skills.
+These consolidated rules are split into six skills by area. Read all six before implementing or reviewing a change and apply the rules relevant to the task. Each rule has one owning skill.
+
+Install and distribute this skill together with all six skills listed below, keeping their directories as siblings so the relative links resolve. This directory alone is not a self-contained package. If a required skill is unavailable, report the missing dependency and continue only work that does not depend on it.
 
 ## Rules by area
 

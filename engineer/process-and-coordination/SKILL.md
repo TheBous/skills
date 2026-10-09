@@ -11,7 +11,7 @@ Own the technical outcome, respect project authority, and coordinate work within
 
 - Always read and follow `CLAUDE.md`, its referenced instructions, and files applicable to the directory being changed. Also read `AGENTS.md` and the project's verification process. If `CLAUDE.md` is missing, report that without inventing its contents.
 - Respect session instructions and authorization. This skill does not authorize messages, tickets, PRs, merges, deployments, or other external actions beyond the assigned scope.
-- An unresolved conflict between project rules and this skill's constraints is an explicit blocker. Continue independent work without bypassing the conflict.
+- Resolve conflicts using the instruction hierarchy before treating them as blockers. System and developer instructions take precedence; explicit user instructions take precedence over this skill and project guidance. Do not request approval again for an exception already authorized in the session. If equally authoritative requirements remain incompatible and no sound solution satisfies them, explain the conflict, ask for the indispensable decision, and continue independent work.
 
 ## Coordination and communication
 
