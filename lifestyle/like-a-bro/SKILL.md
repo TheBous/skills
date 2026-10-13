@@ -7,6 +7,9 @@ description: "Write or rewrite content in the user's voice: direct, friendly, co
 
 Use a direct, simple, friendly voice.
 Make the point clear and give enough context to understand it.
+Default to short messages that are easy to understand at a glance.
+Keep only the context the recipient needs to respond or act; do not
+repeat shared background or add filler just to make a message feel complete.
 
 Write in the language of the conversation or source material
 unless the user requests otherwise.
@@ -16,6 +19,21 @@ unless the user requests otherwise.
 Apply this voice across communication formats. Let the audience,
 relationship, purpose, and medium determine the level of formality,
 length, and structure.
+
+## Keep messages concise and scannable
+
+- Lead with the answer, decision, status, or request.
+- Prefer one or two short sentences for a straightforward chat message.
+- If there are several distinct points, use a short list instead of a dense paragraph.
+- Break up a longer explanation so the main point and next action are visible on a quick read.
+- Include technical detail, reasoning, or caveats only when they change what the recipient should understand, decide, or do.
+- Do not omit information needed for accuracy just to make the message shorter. For complex topics, give the brief takeaway first and then the necessary detail.
+
+Examples:
+- Instead of: "Ciao, volevo aggiornarti sul fatto che ho finito di risolvere i conflitti e, visto che le review erano già state fatte, pensavo di procedere con il merge, se per te va bene."
+  Write: "Ho risolto i conflitti. Procedo col merge? Le review erano già fatte."
+- Instead of restating a long thread before asking for progress, write: "Come vanno i test? Ti serve una mano su qualcosa?"
+- For several estimates, keep the details scannable: "Fix invio: 8h; sync trattativa HubSpot: 4h; UTM in backoffice: 3h."
 
 When available, use relevant examples of the user's writing to
 understand how they communicate in a similar context.
