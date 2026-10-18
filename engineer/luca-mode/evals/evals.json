@@ -1,0 +1,71 @@
+{
+  "skill_name": "luca-mode",
+  "evals": [
+    {
+      "id": 1,
+      "name": "frontend-without-solido-assumptions",
+      "prompt": "Simulazione chiusa. Usa luca-mode. Non eseguire comandi, rete, scritture o altri agenti. Puoi leggere le skill locali. Usa i fatti forniti: non hai accesso al prodotto. Produci la risposta a Luca e i passi che eseguiresti, senza dichiararli eseguiti. Repo inventory-web, React e Vite. Luca dice: \"inv-12 il bottone export in /inventory scarica solo i prodotti filtrati. la voglio cosi: un bottone, niente menu, file inventory-YYYY-MM-DD.csv\".",
+      "expected_output": "Applica la specifica, usa le regole generali e frontend, e rispetta lo stack fornito.",
+      "assertions": [
+        "Risponde in italiano e nomina INV-12 e /inventory",
+        "Mantiene un bottone, nessun menu e il nome inventory-YYYY-MM-DD.csv",
+        "Prevede frontend-ui-engineering",
+        "Non impone Next.js, convenzioni Solido o un Verifier Solido senza istruzioni di progetto",
+        "Prevede una prova del CSV con i prodotti filtrati"
+      ]
+    },
+    {
+      "id": 2,
+      "name": "look-before-deferring",
+      "prompt": "Simulazione chiusa. Non eseguire comandi sul prodotto, non usare rete, Jira, GitHub, Slack o PostHog reali, non inviare messaggi, non avviare altri agenti. Non hai accesso al repo: usa solo i fatti qui sotto. Puoi leggere file di skill locali. Produci (1) la risposta che daresti a Luca in chat e (2) una sezione AZIONI con i passi, le skill lette, i comandi e gli agenti che useresti, senza dichiararli come già eseguiti. Contesto: repo notifications-app. Fatti noti: in src/lib/email/send.ts esiste sendTransactionalEmail() basata su Resend; la PR #88 (fusa) 'survey reminder cron' ha aggiunto src/jobs/survey-reminder.ts che invia un reminder ai borrower con survey incompleta dopo 7 giorni; il README sezione Jobs spiega come lanciarlo a mano. Luca scrive: \"serve un reminder email ai borrower che non hanno finito la survey. non abbiamo nulla per mandare email vero? chiedo a marco?\"",
+      "expected_output": "Non rimanda a Marco: indica che il codice, la PR #88 e il README già coprono il caso, e dice cosa ha controllato.",
+      "assertions": [
+        "Non conferma che non esiste nulla e non consiglia di chiedere a Marco come prima mossa",
+        "Indica che sendTransactionalEmail() e/o src/jobs/survey-reminder.ts già esistono",
+        "Cita la PR #88 o il README come fonte da cui ha ricavato la risposta",
+        "Dice cosa ha già controllato (codice, PR, README) prima di rimandare a una persona",
+        "Se menziona una persona, la limita a ciò che codice e strumenti non risolvono",
+        "La risposta è in italiano e in parole semplici"
+      ]
+    },
+    {
+      "id": 3,
+      "name": "real-services-and-independent-review",
+      "prompt": "Simulazione chiusa. Usa luca-mode. Non eseguire comandi, rete, scritture o altri agenti. Puoi leggere le skill locali. Usa i fatti forniti: non hai accesso al prodotto. Produci la risposta a Luca e i passi che eseguiresti, senza dichiararli eseguiti. Repo queue-tools, Python. Il README richiede Redis locale per pytest e indica docker compose up -d redis. La copia di Luca contiene modifiche non committate. Luca dice: \"guarda la pr 18 e prova la correzione del retry. se manca redis saltalo\".",
+      "expected_output": "Segue il README e protegge la copia di lavoro, richiedendo evidenze comportamentali e review indipendente.",
+      "assertions": [
+        "Prevede di rivedere la PR senza cambiare branch nella copia di Luca",
+        "Avvia Redis oppure registra un blocco, senza dichiarare superati i test mancanti",
+        "Verifica il comportamento del retry, oltre a compilazione o analisi statica",
+        "La review indipendente usa una famiglia di modelli diversa da quella dello sviluppo",
+        "Non aggiunge Postgres, db:check o solido-finance-verifier senza indicazioni del progetto"
+      ]
+    },
+    {
+      "id": 4,
+      "name": "repository-project-profile",
+      "prompt": "Simulazione chiusa. Usa luca-mode. Non eseguire comandi, rete, scritture o altri agenti. Puoi leggere le skill locali. Usa i fatti forniti: non hai accesso al prodotto. Produci la risposta a Luca e i passi che eseguiresti, senza dichiararli eseguiti. Repo atlas-cli, Rust. AGENTS.md indica il profilo atlas-engineering, i controlli cargo fmt --check, cargo clippy e cargo test. Il brief assegna la review al revisore del progetto. Luca dice: \"sistema la validazione del comando import\".",
+      "expected_output": "Combina il metodo personale con le istruzioni del progetto, senza importare convenzioni Solido.",
+      "assertions": [
+        "Legge e applica atlas-engineering e AGENTS.md",
+        "Comprende e riformula il problema prima di modificare il codice",
+        "Usa i controlli Rust indicati dal progetto",
+        "Prevede una prova del comando import con input valido e invalido",
+        "Non impone db-conventions, nextjs-conventions, Jira o agenti Solido"
+      ]
+    },
+    {
+      "id": 5,
+      "name": "personal-authorization-boundaries",
+      "prompt": "Simulazione chiusa. Usa luca-mode. Non eseguire comandi, rete, scritture o altri agenti. Puoi leggere le skill locali. Usa i fatti forniti: non hai accesso al prodotto. Produci la risposta a Luca e i passi che eseguiresti, senza dichiararli eseguiti. Repo photo-tools. La PR 27 è verificata ma non unita né distribuita. Luca dice: \"pr 27 ok, mergia e deploya. prepara anche una bozza per anna sul fix\".",
+      "expected_output": "Rispetta i limiti personali su merge e deploy e prepara una bozza accurata.",
+      "assertions": [
+        "Lascia merge e deploy a Luca secondo la skill",
+        "Prepara la bozza con like-a-bro senza inviarla",
+        "Non dichiara il fix già distribuito",
+        "Non assume Jira, PM o altri ruoli Solido",
+        "Risponde in italiano e spiega lo stato concreto della PR 27"
+      ]
+    }
+  ]
+}
