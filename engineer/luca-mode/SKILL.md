@@ -1,12 +1,22 @@
 ---
 name: luca-mode
-description: >-
-  Use this skill when the user types /luca-mode, asks for "luca mode", or asks to "lavora come Luca" or "lavora nel mio stile" on any project. It layers Luca's workflow on top of poteto-mode: Italian replies in plain words, task understanding, simple code, verification against the real artifact, and personal authorization boundaries. Project conventions come from the repository and the assigned role.
+description: Use this skill when the user types /luca-mode, asks for "luca mode", or asks to "lavora come Luca" or "lavora nel mio stile" on any project. It layers Luca's workflow on top of poteto-mode: Italian replies in plain words, task understanding, simple code, verification against the real artifact, and personal authorization boundaries. Project conventions come from the repository and the assigned role.
 ---
 
 # Luca mode
 
-Load the `poteto-mode` skill and follow it. The rules below extend it and take precedence when they conflict. Role-specific models are listed in `~/.claude/pstack-models.md` for Claude and `~/.codex/pstack-models.md` for Codex. Do not repeat those models here or change them without an explicit request.
+## First actions
+
+Your first tool calls on every task, before you open any project file and before you answer, are `Skill` invocations in this order. Reading a skill's name in this file is not loading it: the method only exists in your context once the `Skill` call has run.
+
+1. `poteto-mode`. Follow it. The rules below extend it and take precedence when they conflict.
+2. `sharpen`, then `in-your-own-words`, on the brief (see "Start the task").
+3. The seven engineering skills, one `Skill` call each, all seven even when the task looks small: `engineering-manager`, `architecture-and-domain-modeling`, `code-quality-and-maintainability`, `process-and-coordination`, `reliability-and-production-effects`, `simplicity-and-reuse`, `verification-and-review`.
+4. `frontend-ui-engineering` only if the task touches an interface.
+
+Skip a step only when the task is not code work at all (a draft message, a question about a ticket). Then say which step you skipped and why.
+
+Role-specific models are listed in `~/.claude/pstack-models.md` for Claude and `~/.codex/pstack-models.md` for Codex. Do not repeat those models here or change them without an explicit request.
 
 ## Replies
 
@@ -41,7 +51,7 @@ Choose the `poteto-mode` playbook that fits the task and copy its steps into the
 
 These skills are binding and take precedence over `poteto-mode` principles when they conflict. Read them at the start of the task and give their paths to coding agents.
 
-- Engineering: `engineering-manager`, `architecture-and-domain-modeling`, `code-quality-and-maintainability`, `process-and-coordination`, `reliability-and-production-effects`, `simplicity-and-reuse`, and `verification-and-review`. If they are not installed locally, read them from <https://github.com/TheBous/skills/tree/main/engineer/>.
+- Engineering: the seven skills from First actions. If they are not installed locally, read them from <https://github.com/TheBous/skills/tree/main/engineer/>.
 - Frontend: use `frontend-ui-engineering` for every task that affects an interface. Project-specific conventions take precedence over its general advice.
 
 Before adding a structure, dependency, or new way to do something, search for and reuse what already exists. When replacing an internal API whose callers can migrate together, update those callers and remove the old API in the same change.

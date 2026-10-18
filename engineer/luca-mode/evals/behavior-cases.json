@@ -1,0 +1,90 @@
+{
+  "skill_name": "luca-mode",
+  "always_skills": ["luca-mode", "poteto-mode", "sharpen", "in-your-own-words"],
+  "engineering_skills": [
+    "engineering-manager",
+    "architecture-and-domain-modeling",
+    "code-quality-and-maintainability",
+    "process-and-coordination",
+    "reliability-and-production-effects",
+    "simplicity-and-reuse",
+    "verification-and-review"
+  ],
+  "frontend_skill": "frontend-ui-engineering",
+  "fixture": {
+    "AGENTS.md": "# inventory-web\nReact + Vite. Run `npm test` before delivery.\n",
+    "README.md": "# inventory-web\nStock management UI. `npm run dev` starts it.\n",
+    "package.json": "{\n  \"name\": \"inventory-web\",\n  \"dependencies\": {\n    \"react\": \"18.3.1\",\n    \"date-fns\": \"3.6.0\",\n    \"@tanstack/react-query\": \"5.51.0\"\n  }\n}\n",
+    "src/lib/format.ts": "export const formatEuro = (cents: number) =>\n  new Intl.NumberFormat(\"it-IT\", { style: \"currency\", currency: \"EUR\" }).format(cents / 100);\n",
+    "src/lib/totals.ts": "export const total = (items) => items.reduce((s, i) => s + Math.round(i.price * i.qty), 0);\n",
+    "src/api/products.ts": "export const fetchProducts = () => fetch(\"/api/products\").then((r) => r.json());\nexport const deleteProduct = (id: string) => fetch(`/api/products/${id}`, { method: \"DELETE\" });\n",
+    "src/hooks/useProducts.ts": "import { useMutation, useQuery } from \"@tanstack/react-query\";\nimport { deleteProduct, fetchProducts } from \"../api/products\";\n\nexport const useProducts = () => useQuery({ queryKey: [\"products\"], queryFn: fetchProducts });\nexport const useDeleteProduct = () => useMutation({ mutationFn: deleteProduct });\n",
+    "src/components/ExportButton.tsx": "export function ExportButton({ products }) {\n  const download = () => saveCsv(products, \"inventory.csv\");\n  return <button onClick={download}>Export</button>;\n}\n",
+    "src/components/ProductCard.tsx": "export function ProductCard({ p }) {\n  return (\n    <div className=\"card\">\n      <h3>{p.name}</h3>\n    </div>\n  );\n}\n",
+    "src/pages/Inventory.tsx": "import { format } from \"date-fns\";\nimport { ExportButton } from \"../components/ExportButton\";\nimport { formatEuro } from \"../lib/format\";\nimport { useDeleteProduct, useProducts } from \"../hooks/useProducts\";\n\nexport function Inventory({ filter }) {\n  const { data: products = [] } = useProducts();\n  const del = useDeleteProduct();\n  const shown = products.filter((p) => p.name.includes(filter));\n  return (\n    <>\n      <ExportButton products={shown} />\n      <table>\n        {shown.map((p) => (\n          <tr key={p.id}>\n            <td>{p.name}</td>\n            <td>{formatEuro(p.priceCents)}</td>\n            <td>{format(p.updatedAt, \"dd/MM/yyyy\")}</td>\n            <td><button onClick={() => del.mutate(p.id)}>Elimina</button></td>\n          </tr>\n        ))}\n      </table>\n    </>\n  );\n}\n"
+  },
+  "cases": [
+    {
+      "id": "ui-task",
+      "prompt": "Usa luca-mode. Repo inventory-web (React + Vite), la trovi nella cartella corrente. inv-12: il bottone export in /inventory scarica solo i prodotti filtrati. la voglio cosi: un bottone, niente menu, file inventory-YYYY-MM-DD.csv",
+      "checks": [{"type": "skills", "ui": true}, {"type": "todo", "playbooks": ["feature", "bug-fix"]}]
+    },
+    {
+      "id": "backend-task",
+      "prompt": "Usa luca-mode. Repo inventory-web nella cartella corrente. api-7: l'endpoint che calcola i totali del magazzino arrotonda male quando ci sono prezzi con 3 decimali, sistemalo",
+      "checks": [{"type": "skills", "ui": false}, {"type": "todo", "playbooks": ["bug-fix"]}]
+    },
+    {
+      "id": "terse-lowercase-brief",
+      "prompt": "luca mode. inv-15 nella pagina inventario la tabella non si aggiorna dopo che cancello un prodotto. guarda tu",
+      "checks": [{"type": "skills", "ui": true}, {"type": "todo", "playbooks": ["bug-fix"]}]
+    },
+    {
+      "id": "refactor-rename",
+      "prompt": "Usa luca-mode. Repo inventory-web nella cartella corrente. inv-40: rinomina il componente Inventory in InventoryPage, il comportamento non deve cambiare",
+      "checks": [{"type": "todo", "playbooks": ["refactoring"]}]
+    },
+    {
+      "id": "ambiguous-delete",
+      "prompt": "Usa luca-mode. Repo inventory-web nella cartella corrente. inv-21: cancella i prodotti vecchi dal magazzino",
+      "checks": [{"type": "asks_one_question"}]
+    },
+    {
+      "id": "ambiguous-notify",
+      "prompt": "Usa luca-mode. Repo inventory-web nella cartella corrente. inv-23: avvisa i clienti quando un prodotto finisce",
+      "checks": [{"type": "asks_one_question"}]
+    },
+    {
+      "id": "reuse-price-helper",
+      "prompt": "Usa luca-mode. Repo inventory-web nella cartella corrente. inv-30: nella card prodotto mostra il prezzo come nel resto dell'app",
+      "checks": [
+        {"type": "asks_no_question"},
+        {"type": "reuse", "token": "formatEuro", "forbidden": ["Intl\\.NumberFormat", "toLocaleString", "toFixed", "/ ?100"], "unchanged": ["package.json"]}
+      ]
+    },
+    {
+      "id": "reuse-existing-dependency",
+      "prompt": "Usa luca-mode. Repo inventory-web nella cartella corrente. inv-31: nella card prodotto mostra la data di ultimo aggiornamento come nel resto dell'app",
+      "checks": [
+        {"type": "asks_no_question"},
+        {"type": "reuse", "token": "date-fns", "forbidden": ["toLocaleDateString", "Intl\\.DateTimeFormat", "getFullYear", "getMonth"], "unchanged": ["package.json"]}
+      ]
+    },
+    {
+      "id": "restart-after-non-ho-capito",
+      "turns": [
+        "Usa luca-mode. Repo inventory-web nella cartella corrente. inv-15: la tabella non si aggiorna dopo che cancello un prodotto. spiegami perche succede, non toccare il codice",
+        "non ho capito"
+      ],
+      "checks": [{"type": "plain_restart"}]
+    },
+    {
+      "id": "restart-after-bro-2",
+      "turns": [
+        "Usa luca-mode. Repo inventory-web nella cartella corrente. inv-15: la tabella non si aggiorna dopo che cancello un prodotto. spiegami perche succede, non toccare il codice",
+        "/bro-2"
+      ],
+      "checks": [{"type": "plain_restart"}]
+    }
+  ]
+}
