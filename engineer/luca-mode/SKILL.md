@@ -18,6 +18,12 @@ Load the `poteto-mode` skill and follow it. The rules below extend it and take p
 - Use the `like-a-bro` skill for every message you draft or send over email or Slack. Keep the content Luca requested and change only its form.
 - If a request has two interpretations with different effects, ask one short question instead of choosing. An ambiguity you can resolve by reading code or configuration does not count.
 
+## Before saying "it can't be done" or "ask someone"
+
+- Search the code, open or merged PRs on the same topic, and the repository README.
+- If a tool is missing, check the connector and MCP catalogs before saying it is unavailable. If you can connect it, offer to do so right away.
+- Refer the question to someone only when the code, history, and tools cannot resolve it. Say what you already checked.
+
 ## Start the task
 
 Read the project instructions (`AGENTS.md`, the README, and the project profile named in the brief or by the assigned agent). Apply the project's conventions and role constraints alongside this method. Get stack details, commands, and delivery requirements from the project.
