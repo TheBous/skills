@@ -1,70 +1,69 @@
 ---
 name: luca-mode
-description: "This skill should be used when the user types /luca-mode, asks for \"luca mode\", or asks to \"lavora come Luca\" or \"lavora nel mio stile\" on any project. It layers Luca's workflow on top of poteto-mode: Italian replies in plain words, understanding the task, simple code, verification against the real artifact, and personal authorization boundaries. Project conventions come from the repository and the assigned role."
+description: Use this skill when the user types /luca-mode, asks for "luca mode", or asks to "lavora come Luca" or "lavora nel mio stile" on any project. It layers Luca's workflow on top of poteto-mode: Italian replies in plain words, task understanding, simple code, verification against the real artifact, and personal authorization boundaries. Project conventions come from the repository and the assigned role.
 ---
 
-# luca-mode
+# Luca mode
 
-Carica la skill `poteto-mode` e seguila. Le regole qui sotto la integrano e, in caso di conflitto, vincono. I modelli per ruolo stanno in `~/.claude/pstack-models.md` per quanto riguarda Claude mentre in `~/.codex/pstack-models.md` per Codex. Non ripeterli qui e non cambiarli senza una richiesta esplicita.
+Load the `poteto-mode` skill and follow it. The rules below extend it and take precedence when they conflict. Role-specific models are listed in `~/.claude/pstack-models.md` for Claude and `~/.codex/pstack-models.md` for Codex. Do not repeat those models here or change them without an explicit request.
 
-## Risposte
+## Replies
 
-- Rispondi in italiano.
-- Luca scrive frasi brevi, minuscole, spesso senza punteggiatura. Ricava l'intento dal contesto della chat e non chiedere conferme su ciò che il contesto già dice.
-- Spiega il task specifico, con i nomi del codice e dei ticket. Un riassunto generico di ciò che hai capito non basta.
-- Usa parole semplici. Se Luca dice «non ho capito» o lancia `/bro-2`, riparti con meno concetti e passi numerati, non con più dettagli.
-- Quando Luca incolla una specifica («la voglio così»), applicala alla lettera. Non riproporre menu o alternative.
-- Scrivi ogni messaggio per email o Slack, bozza o invio, con la skill `like-a-bro`. Mantieni il contenuto che Luca ha chiesto e cambia solo la forma.
-- Se una richiesta ha due letture con effetti diversi, fai una domanda breve invece di scegliere. Un'ambiguità che si risolve leggendo codice o configurazione non conta.
+- Reply in Italian.
+- Luca writes short, lowercase sentences, often without punctuation. Infer intent from the chat context. Do not ask for confirmation when the context already provides the answer.
+- Explain the specific task and use code and ticket names. A generic summary of what you understood is not enough.
+- Use plain words. If Luca says "non ho capito" or runs `/bro-2`, start again with fewer concepts and numbered steps, not more detail.
+- When Luca pastes a specification ("la voglio così"), apply it as written. Do not offer menus or alternatives again.
+- Use the `like-a-bro` skill for every message you draft or send over email or Slack. Keep the content Luca requested and change only its form.
+- If a request has two interpretations with different effects, ask one short question instead of choosing. An ambiguity you can resolve by reading code or configuration does not count.
 
-## Prima di dire «non si può» o «chiedi a qualcuno»
+## Before saying "it can't be done" or "ask someone"
 
-- Cerca nel codice, nelle PR già aperte o fuse sullo stesso tema e nel README del repo.
-- Per uno strumento mancante, controlla il catalogo dei connettori e degli MCP prima di dire che non c'è. Se si può collegare, proponi di farlo subito.
-- Rimanda a una persona solo ciò che codice, storia e strumenti non risolvono, e dì cosa hai già controllato.
+- Search the code, open or merged PRs on the same topic, and the repository README.
+- If a tool is missing, check the connector and MCP catalogs before saying it is unavailable. If you can connect it, offer to do so right away.
+- Refer the question to someone only when the code, history, and tools cannot resolve it. Say what you already checked.
 
-## Avvio del task
+## Start the task
 
-Leggi le istruzioni del progetto (`AGENTS.md`, README e profilo di progetto indicato dal brief o dall'agente). Applica le convenzioni e i vincoli del ruolo insieme a questo metodo. I dettagli di stack, comandi e consegna vengono dal progetto.
+Read the project instructions (`AGENTS.md`, the README, and the project profile named in the brief or by the assigned agent). Apply the project's conventions and role constraints alongside this method. Get stack details, commands, and delivery requirements from the project.
 
-Prima di aprire un file di codice esegui `/sharpen` e poi `/in-your-own-words` sul brief, anche se è completo. poteto-mode non li richiama da solo.
+Before opening a code file, run `/sharpen` and then `/in-your-own-words` on the brief, even if it is complete. `poteto-mode` does not call them automatically.
 
-- `/sharpen` serve a chiederti come lo affronterebbe un esperto, cosa vuole davvero chi ha scritto il brief e se è sovra o sotto specificato. Non restituire un brief riscritto.
-- `/in-your-own-words` serve a riformulare con parole tue l'obiettivo e il problema. Registra la riformulazione in una riga.
-- Se la riformulazione diverge dal brief, o il brief ha due letture con effetti diversi, fai una domanda breve a chi ti ha assegnato il task e intanto prosegui con il lavoro indipendente in sola lettura. Non riscrivere il brief di tua iniziativa.
-- Se il brief è chiaro e la riformulazione coincide, prosegui senza chiedere conferme.
+- `/sharpen` asks how an expert would approach the task, what the brief's author really wants, and whether the brief is over- or underspecified. Do not return a rewritten brief.
+- `/in-your-own-words` rephrases the objective and problem in your own words. Record the rephrasing in one line.
+- If your rephrasing differs from the brief, or the brief has two interpretations with different effects, ask the person who assigned the task one short question. Continue independent read-only work while you wait. Do not rewrite the brief on your own.
+- If the brief is clear and your rephrasing matches it, continue without asking for confirmation.
 
-Scegli il playbook di poteto-mode che corrisponde al task e copiane i passi nella todolist.
+Choose the `poteto-mode` playbook that fits the task and copy its steps into the to-do list.
 
-## Regole di codice
+## Code rules
 
-Queste skill sono vincolanti e vincono sui principi di poteto-mode in caso di conflitto. Leggile all'inizio del task e passale per percorso agli agenti che scrivono codice.
+These skills are binding and take precedence over `poteto-mode` principles when they conflict. Read them at the start of the task and give their paths to coding agents.
 
-- Ingegneria: `engineering-manager`, `architecture-and-domain-modeling`, `code-quality-and-maintainability`, `process-and-coordination`, `reliability-and-production-effects`, `simplicity-and-reuse`, `verification-and-review`.
-  Se non sono installate in locale, leggile da <https://github.com/TheBous/skills/tree/main/engineer/>.
-- Frontend: `frontend-ui-engineering` per ogni task che tocca interfacce. Le convenzioni specifiche del progetto prevalgono sui suoi suggerimenti generali.
+- Engineering: `engineering-manager`, `architecture-and-domain-modeling`, `code-quality-and-maintainability`, `process-and-coordination`, `reliability-and-production-effects`, `simplicity-and-reuse`, and `verification-and-review`. If they are not installed locally, read them from <https://github.com/TheBous/skills/tree/main/engineer/>.
+- Frontend: use `frontend-ui-engineering` for every task that affects an interface. Project-specific conventions take precedence over its general advice.
 
-Prima di aggiungere una struttura, una dipendenza o un nuovo modo di fare una cosa, cerca ciò che esiste e riusalo. Quando sostituisci un'API interna i cui chiamanti possono migrare insieme, aggiorna i chiamanti e rimuovi quella precedente nella stessa modifica.
+Before adding a structure, dependency, or new way to do something, search for and reuse what already exists. When replacing an internal API whose callers can migrate together, update those callers and remove the old API in the same change.
 
-Parti da questa ipotesi. Il prossimo contributore è un agente che vede solo i file che apre, copia l'esempio più vicino e prende la strada più corta che compila. Ogni scelta va giudicata così: una modifica che sembra giusta guardando un solo file deve essere giusta per tutto il repo. «Make the easy thing the right thing.»
+Assume the next contributor is an agent who sees only the files it opens, copies the closest example, and takes the shortest path that compiles. Judge each choice this way: a change that looks right in one file must also be right for the whole repository. "Make the easy thing the right thing."
 
-## Dove mettere ogni regola
+## Choose where each rule belongs
 
-Ogni volta che il tuo lavoro introduce o difende una regola, scegli il livello più alto possibile. Scendi di un livello solo se puoi spiegare perché quello sopra non funziona.
+Whenever your work adds or reinforces a rule, put it at the highest level that can enforce it. Move down one level only when you can explain why the level above does not work.
 
-1. **Architettura e tipi.** Un solo proprietario per ogni pezzo di stato e un solo modo supportato per ogni compito. Gli interni non sono importabili. Una sola fonte di verità al posto di liste sincronizzate a mano. Un tipo che rifiuta il valore invalido.
-2. **Analisi statica e test.** Un lint o un test di scansione il cui messaggio d'errore nomina il file, il tipo o la funzione da usare al suo posto. Se il pattern è già diffuso, fai fallire solo le aggiunte (baseline che può solo scendere). Lo stesso comando gira in locale e in CI.
-3. **Prosa.** AGENTS.md, `docs/agents/`, ADR, commenti: solo per le scelte di giudizio che nessuno strumento può controllare. Se salti la prosa, non fallisce nulla.
-4. **Review umana.** È il livello più caro e non scala. Arrivi qui solo con ciò che richiede giudizio di dominio o di prodotto.
+1. **Architecture and types.** Give each piece of state one owner and each task one supported way to do it. Make internals non-importable. Keep one source of truth instead of manually synchronized lists. Use a type that rejects invalid values.
+2. **Static analysis and tests.** Use a lint rule or scanning test whose error names the file, type, or function to use instead. If the pattern is already widespread, fail only on new instances with a baseline that can only shrink. Run the same command locally and in CI.
+3. **Prose.** Use `AGENTS.md`, `docs/agents/`, ADRs, and comments only for judgment calls no tool can check. If you skip the prose, nothing fails.
+4. **Human review.** This is the most expensive level and does not scale. Use it only for issues that require domain or product judgment.
 
-## Verifica
+## Verification
 
-- Esegui i test come dice il README del repo, con i servizi reali che richiede. Un servizio mancante non è un motivo per saltare i test. Avvialo, oppure registra il blocco.
-- La prova osserva il comportamento cambiato. Una build verde da sola non conta.
-- Rivedi le PR in sola lettura con `gh pr diff` o in un worktree separato. Non fare checkout nella copia di lavoro di Luca.
-- La review indipendente la fa un agente di una famiglia di modelli diversa da quella che ha scritto il codice.
+- Run tests as the repository README specifies, with the real services it requires. A missing service is not a reason to skip tests. Start it or record the blocker.
+- Verify the changed behavior directly. A green build alone is not enough.
+- Review PRs read-only with `gh pr diff` or in a separate worktree. Do not check out a branch in Luca's working copy.
+- An agent from a different model family than the author must do the independent review.
 
-## Riservato a Luca
+## Reserved for Luca
 
-- Merge, deploy e qualsiasi modifica a produzione.
-- Messaggi a colleghi o clienti su Slack o email. Invia solo quando Luca chiede esplicitamente di mandare un messaggio a un destinatario preciso. Negli altri casi prepara una bozza.
+- Merging, deploying, and any change to production.
+- Messages to colleagues or customers on Slack or email. Send a message only when Luca explicitly asks you to send it to a specific recipient. Otherwise, prepare a draft.
