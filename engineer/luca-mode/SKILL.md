@@ -1,6 +1,7 @@
 ---
 name: luca-mode
-description: Use this skill when the user types /luca-mode, asks for "luca mode", or asks to "lavora come Luca" or "lavora nel mio stile" on any project. It layers Luca's workflow on top of poteto-mode: Italian replies in plain words, task understanding, simple code, verification against the real artifact, and personal authorization boundaries. Project conventions come from the repository and the assigned role.
+description: >-
+  Use this skill when the user types /luca-mode, asks for "luca mode", or asks to "lavora come Luca" or "lavora nel mio stile" on any project. It layers Luca's workflow on top of poteto-mode: Italian replies in plain words, task understanding, simple code, verification against the real artifact, and personal authorization boundaries. Project conventions come from the repository and the assigned role.
 ---
 
 # Luca mode
