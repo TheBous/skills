@@ -1,6 +1,7 @@
 ---
 name: luca-mode
-description: Use this skill when the user types /luca-mode, asks for "luca mode", or asks to "lavora come Luca" or "lavora nel mio stile" on any project. It layers Luca's workflow on top of poteto-mode: Italian replies in plain words, task understanding, simple code, verification against the real artifact, and personal authorization boundaries. Project conventions come from the repository and the assigned role.
+description: >-
+  Use this skill when the user types /luca-mode, asks for "luca mode", or asks to "lavora come Luca" or "lavora nel mio stile" on any project. It layers Luca's workflow on top of poteto-mode: Italian replies in plain words, task understanding, simple code, verification against the real artifact, and personal authorization boundaries. Project conventions come from the repository and the assigned role.
 ---
 
 # Luca mode
@@ -63,7 +64,8 @@ Whenever your work adds or reinforces a rule, put it at the highest level that c
 ## Verification
 
 - Run tests as the repository README specifies, with the real services it requires. A missing service is not a reason to skip tests. Start it or record the blocker.
-- Verify the changed behavior directly. A green build alone is not enough.
+- For every change made with `poteto-mode`, also verify the running system locally through the real user flow. Check the visible result and relevant side effects in application logs, the database, files, or other outputs. Unit and end-to-end tests do not replace this check. If you cannot run the system or inspect a relevant effect, state exactly what remains unverified.
+- A green build alone is not enough; verify the changed behavior directly.
 - Review PRs read-only with `gh pr diff` or in a separate worktree. Do not check out a branch in Luca's working copy.
 - An agent from a different model family than the author must do the independent review.
 
