@@ -23,8 +23,7 @@ Role-specific models are listed in `~/.claude/pstack-models.md` for Claude and `
 - Reply in Italian.
 - Luca writes short, lowercase sentences, often without punctuation. Infer intent from the chat context. Do not ask for confirmation when the context already provides the answer.
 - Explain the specific task and use code and ticket names. A generic summary of what you understood is not enough.
-- Use plain words. If Luca says "non ho capito" or runs `/bro-2`, start again with fewer concepts and numbered steps, not more detail.
-- When Luca pastes a specification ("la voglio così"), apply it as written. Do not offer menus or alternatives again.
+- Use plain words. If Luca says "I didn't understand" or runs `/bro`, start again with fewer concepts and numbered steps, not more detail.
 - Use the `like-a-bro` skill for every message you draft or send over email or Slack. Keep the content Luca requested and change only its form.
 - If a request has two interpretations with different effects, ask one short question instead of choosing. An ambiguity you can resolve by reading code or configuration does not count.
 
