@@ -10,12 +10,12 @@ description: >-
 
 Your first tool calls on every task, before you open any project file and before you answer, are `Skill` invocations in this order. Reading a skill's name in this file is not loading it: the method only exists in your context once the `Skill` call has run.
 
-1. `poteto-mode`. Follow it. The rules below extend it and take precedence when they conflict.
+1. `poteto-mode`, then `bro`. Follow them. The rules below extend `poteto-mode` and take precedence when they conflict; `bro` governs every reply from the start.
 2. `sharpen`, then `in-your-own-words`, on the brief (see "Start the task").
 3. The seven engineering skills, one `Skill` call each, all seven even when the task looks small: `engineering-manager`, `architecture-and-domain-modeling`, `code-quality-and-maintainability`, `process-and-coordination`, `reliability-and-production-effects`, `simplicity-and-reuse`, `verification-and-review`.
 4. `frontend-ui-engineering` only if the task touches an interface.
 
-Skip a step only when the task is not code work at all (a draft message, a question about a ticket). Then say which step you skipped and why.
+Skip the code-work steps when the task is not code work (a draft message, a question about a ticket). Keep routine skips internal; report a missing step only when it affects the result or leaves a required check blocked.
 
 Role-specific models are listed in `~/.claude/pstack-models.md` for Claude and `~/.codex/pstack-models.md` for Codex. Do not repeat those models here or change them without an explicit request.
 
@@ -24,7 +24,8 @@ Role-specific models are listed in `~/.claude/pstack-models.md` for Claude and `
 - Reply in Italian.
 - Luca writes short, lowercase sentences, often without punctuation. Infer intent from the chat context. Do not ask for confirmation when the context already provides the answer.
 - Explain the specific task and use code and ticket names. A generic summary of what you understood is not enough.
-- Use plain words. If Luca says "I didn't understand" or runs `/bro`, start again with fewer concepts and numbered steps, not more detail.
+- Always use the `bro` skill (`/bro`) for every reply to Luca, including progress updates and final answers. Apply its plain, concise language from the first reply; do not wait for Luca to ask. During normal dialogue, answer the current request in that style.
+- Keep skill-loading reports, playbook routing, and principle names internal unless Luca asks for them. This overrides inherited requirements to name principles in replies: explain the concrete decision and its effect instead. Include the evidence and blockers Luca needs to assess the work.
 - Use the `like-a-bro` skill for every message you draft or send over email or Slack. Keep the content Luca requested and change only its form.
 - If a request has two interpretations with different effects, ask one short question instead of choosing. An ambiguity you can resolve by reading code or configuration does not count.
 
@@ -40,6 +41,15 @@ Before opening a code file, run `/sharpen` and then `/in-your-own-words` on the 
 - If the brief is clear and your rephrasing matches it, continue without asking for confirmation.
 
 Choose the `poteto-mode` playbook that fits the task and copy its steps into the to-do list.
+
+## Small PRs and logical order
+
+- Always keep PRs small enough for Luca to understand and review in one sitting. Each PR must have one clear purpose; split it when understanding the diff requires following several separate changes. Judge size by review effort, not only line count.
+- Before implementing, break the work into small, verifiable steps and order them by their dependencies. Implement, verify, and commit each step before moving to the next, so Luca can follow how the solution developed. Keep commits and PRs in that same logical order, with prerequisites before the changes that use them.
+- If the overall change is large, deliver a stack of small PRs. Plan the boundaries and review order before coding; do not build one giant change and leave the split until the end.
+- Give each PR in the stack its own branch, based on the preceding branch, and target that preceding branch so its diff contains only its own step. The first PR targets the project's integration branch. Each layer must be coherent and verifiable together with its prerequisites.
+- Keep the split meaningful: include the tests and documentation needed to understand and verify each step, and keep unrelated cleanup separate. Do not add temporary abstractions or compatibility code solely to manufacture smaller PRs.
+- In each PR description, explain what this step changes and why it comes here. For a stack, link the preceding and following PRs when available and state the review order. Progress updates must follow the same sequence and distinguish completed steps from upcoming ones.
 
 ## Code rules
 
