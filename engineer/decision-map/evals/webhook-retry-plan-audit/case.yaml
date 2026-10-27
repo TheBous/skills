@@ -1,0 +1,4 @@
+schema_version: "1.1"
+name: webhook-retry-plan-audit
+expected_outcome: |
+  Elenca le decisioni con fonte (PAY-19, brainstorming con Luca, vincoli repo sendTransactionalEmail e stripeEventId) e isola all'esterno tutte le decisioni assunte dal modello (migrazione failedAttempts/nextRetryAt, sospensione cliente dopo 3 tentativi, alert Slack #finance-alerts, coda BullMQ/Redis con 5 retry, soglia minima 5€), distinguendo business logic e codice.

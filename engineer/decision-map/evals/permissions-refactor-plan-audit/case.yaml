@@ -1,0 +1,6 @@
+schema_version: "1.1"
+name: permissions-refactor-plan-audit
+context:
+  scaffold_script: place-files.sh
+expected_outcome: |
+  Legge i file forniti, elenca le decisioni con fonte (spec.md TEAM-8, brainstorming.md con Luca, src/auth/roles.ts) e isola all'esterno le decisioni assunte dal modello in plan.md (riassegnazione task aperti all'owner, revoca sessioni e API key su tutta l'organizzazione, creazione tabella AuditLog con cron a 90 giorni, ed eventuale estensione ruolo OWNER), coprendo business logic e codice.

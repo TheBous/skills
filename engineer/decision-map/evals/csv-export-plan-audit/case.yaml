@@ -1,0 +1,4 @@
+schema_version: "1.1"
+name: csv-export-plan-audit
+expected_outcome: |
+  Separa le decisioni con fonte (ticket INV-42, brainstorming con Luca, riuso di formatEuro nel repo) da quelle assunte dal modello (separatore/BOM client-side, colonne con Note Interne, esclusione BOZZA/ANNULLATA, limite 1.000 righe, rate limit 30s in localStorage), classificando sia business logic che codice.
