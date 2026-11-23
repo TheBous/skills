@@ -14,7 +14,7 @@ Your first tool calls on every task, before you open any project file and before
 
 1. `bro`, then `full-stop`. Follow them. The rules below extend `full-stop` and take precedence when they conflict; `bro` governs every reply from the start.
 2. The seven engineering skills, one `Skill` call each, all seven even when the task looks small: `engineering-manager`, `architecture-and-domain-modeling`, `code-quality-and-maintainability`, `process-and-coordination`, `reliability-and-production-effects`, `simplicity-and-reuse`, `verification-and-review`.
-3. `frontend-ui-engineering` when the task touches an interface.
+3. `senior-frontend` when the task touches an interface.
 
 If `full-stop` is not installed, read it from <https://github.com/t3dotgg/tstack/blob/main/skills/full-stop/SKILL.md> and follow it. It builds on `full-send`, so read the skills it names from the same folder (<https://github.com/t3dotgg/tstack/tree/main/skills>) when you reach that step. If a source cannot be read, say which one and pause that step until Luca provides it, so every rule you apply comes from the source.
 
@@ -67,7 +67,7 @@ Copy the steps of the `full-stop` workflow into the to-do list and work through 
 These skills are binding and take precedence over `full-stop` on questions of code. Read them at the start of the task and give their paths to coding agents.
 
 - Engineering: the seven skills from First actions. If they are not installed locally, read them from <https://github.com/TheBous/skills/tree/main/engineer/>.
-- Frontend: use `frontend-ui-engineering` for every task that affects an interface. Project-specific conventions take precedence over its general advice.
+- Frontend: use `senior-frontend` for every task that affects an interface. Project-specific conventions take precedence over its general advice.
 
 Before adding a structure, dependency, or new way to do something, search for what already exists and reuse it. When replacing an internal API whose callers can migrate together, update those callers and remove the old API in the same change.
 
@@ -89,10 +89,13 @@ Whenever your work adds or reinforces a rule, put it at the highest level that c
 - When the project has no verification skill, create a project-local `verify` skill in the current platform's project-skill location that launches the app, waits for readiness, and drives its main journeys, then prove it by running it. This is initial setup, done once per project.
 - Use the brief and diff to identify the affected user journeys and expected results, including relevant entry points in the feature map. Follow the skill's launch, readiness, doctor, and drive instructions to exercise those journeys on the running application. Scope the run to the change and its affected behavior.
 - Verify the visible result and the effects of the same action. Inspect the relevant application logs for errors and expected processing. When the change reads or writes persistent data, use read-only queries or the project's inspection tools to check the actual database records and values against the expected result. Check affected files, messages, and other outputs too. Tie these observations to the exercised action: a correct screen or a successful response together with the logs and stored data shows that processing and persistence are correct.
-- Report the exercised journey, expected and observed results, and paths to the evidence, including relevant log excerpts and database observations. When a required check is blocked, state the blocker and what remains unverified, and report verification as partial. Run the skill's cleanup after successful and failed attempts, removing only instances and scratch state created by the run. Confirm the evidence survives cleanup.
+- Name the proof level of every claim: tests, local app, staging, or data (database records and logs). Say "verified" only after driving the running application; green tests or CI alone mean "the tests pass". State which levels remain unproven.
+- Report the exercised journey, expected and observed results, and the evidence, including relevant log excerpts and database observations. Show each screenshot in the reply as an image with its absolute path (`![caption](/abs/path.png)`): a path written as text is not evidence Luca can see. When a required check is blocked, state the blocker and what remains unverified, and report verification as partial. Run the skill's cleanup after successful and failed attempts, removing only instances and scratch state created by the run. Confirm the evidence survives cleanup.
+- When the diff touches an interface, attach the screenshots to the PR with the `pr-evidence` skill after the verification run, and run its `check` as part of the readiness check. A failing check means the PR is not ready.
+- Do not end a turn while a proof run is still in progress: wait for it and report its result. When proof needs access you lack (a login, a token, a database, an external service), ask Luca for it at once with a direct question, instead of listing it among the limitations.
 - Add new user-facing features to the skill's `features/` map and update affected journeys and proof criteria when behavior changes.
 - Review PRs read-only with `gh pr diff` or in a separate worktree, leaving Luca's working copy on its current branch.
-- An agent from a different model family than the author does the independent review.
+- An agent from a different model family than the author does the independent review: Grok 4.7 at `xhigh` reasoning, unless Luca names another model. When it is unavailable, say so and ask Luca instead of switching model.
 
 ## Reserved for Luca
 
