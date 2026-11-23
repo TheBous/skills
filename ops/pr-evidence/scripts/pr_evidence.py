@@ -11,6 +11,7 @@ attach); attach and skip refuse when the PR head is another commit. A failed upl
 
 import argparse
 import re
+from dataclasses import dataclass
 import shutil
 import sys
 import tempfile
@@ -20,7 +21,9 @@ import github
 
 START, END = "<!-- pr-evidence:start -->", "<!-- pr-evidence:end -->"
 # Markers count only on their own line, so a mention in prose is not a section.
-SECTION = re.compile(rf"^{re.escape(START)}[ \t]*$.*?^{re.escape(END)}[ \t]*$", re.S | re.M)
+MARKER = re.compile(rf"^[ \t]*({re.escape(START)}|{re.escape(END)})[ \t]*$", re.M)
+SECTION = re.compile(rf"^[ \t]*{re.escape(START)}[ \t]*$.*?^[ \t]*{re.escape(END)}[ \t]*$", re.S | re.M)
+DESTINATION = re.compile(r"(!\[[^\]]*\]\()[^)]*\)")
 HEAD = re.compile(r"<!-- pr-evidence:head=([0-9a-f]{64}|[0-9a-f]{40}) -->")
 IMAGE = re.compile(r'!\[[^\]]*\]\(\s*<?([^)\s>]+)>?(?:\s+"[^"]*")?\s*\)')
 UPLOADED_PREFIX = "https://github.com/user-attachments/"
@@ -44,7 +47,7 @@ def is_ui(path: str) -> bool:
 
 def require_paired_markers(body: str) -> None:
     """Start and end lines must alternate, start first: nested, reversed or unpaired markers cannot be repaired safely."""
-    marks = [line.strip() for line in body.splitlines() if line.strip() in (START, END)]
+    marks = MARKER.findall(body)
     if marks != [START, END] * (len(marks) // 2):
         raise CheckFailed("the description has a broken evidence section (pr-evidence start and end comments do not "
                           "pair up); delete those comments by hand, then run attach or skip")
@@ -106,23 +109,30 @@ def confirm(pr: dict) -> None:
         raise CheckFailed("the saved description does not hold the new section")
 
 
+@dataclass
+class Attempt:
+    previous: str  # the description before this attempt
+    sent: str  # the description this attempt wrote, before gh rewrote image destinations
+
+
 def write(pr: dict, content: str, attachments: list[Path]) -> None:
     """Write the section into the body as it is right now, so edits made meanwhile survive. gh saves the body when at
     least one upload worked, so a failure can leave a partial section: settle() decides what to do with it."""
-    previous = github.pull_request(pr["url"], None)["body"] or ""
+    previous = github.pull_request(pr["url"], None)["body"]
     require_paired_markers(previous)
     section = f"{START}\n<!-- pr-evidence:head={pr['taken']} -->\n{content}\n{END}"
+    attempt = Attempt(previous, with_section(previous, section))
     try:
-        put_body(pr, with_section(previous, section), attachments)
+        put_body(pr, attempt.sent, attachments)
         confirm(pr)
     except (CheckFailed, github.GhError) as error:
-        fail_after(pr, previous, error)
+        fail_after(pr, attempt, error)
 
 
-def fail_after(pr: dict, previous: str, error: Exception) -> None:
+def fail_after(pr: dict, attempt: Attempt, error: Exception) -> None:
     """Raise what went wrong and what happened to the description, unless the saved section is complete after all."""
     try:
-        outcome = settle(pr, previous)
+        outcome = settle(pr, attempt)
     except (CheckFailed, github.GhError) as failed:
         raise CheckFailed(f"{error}; checking or restoring the description also failed ({failed}), so it may "
                           f"hold a partial section: try again") from error
@@ -130,18 +140,18 @@ def fail_after(pr: dict, previous: str, error: Exception) -> None:
         raise CheckFailed(f"{error}; {outcome}. Try again") from error
 
 
-def settle(pr: dict, previous: str) -> str | None:
-    """After a failed write: None when the saved section is complete after all, else what happened to the description."""
-    now = github.pull_request(pr["url"], None)["body"] or ""
-    if now == previous:
+def settle(pr: dict, attempt: Attempt) -> str | None:
+    """After a failed write: None when the saved section is complete after all, else what happened to the description.
+    Restore only when the saved body is exactly what this attempt sent, apart from image destinations gh rewrote."""
+    now = github.pull_request(pr["url"], None)["body"]
+    if now == attempt.previous:
         return "the description was not changed"
-    sections = [s for s in SECTION.findall(now) if (m := HEAD.search(s)) and m.group(1) == pr["taken"]]
-    if len(sections) == 1 and is_complete(sections[0]):
+    if DESTINATION.sub(r"\1)", now) != DESTINATION.sub(r"\1)", attempt.sent):
+        return "the description changed meanwhile and was left as it is"
+    if is_complete(find_section(now) or ""):
         return None
-    if len(sections) == 1:
-        put_body(pr, previous, [])
-        return "its partial section was removed and the description put back as it was"
-    return "the description changed meanwhile and was left as it is"
+    put_body(pr, attempt.previous, [])
+    return "its partial section was removed and the description put back as it was"
 
 
 def attach(pr: dict, images: list[str]) -> str:

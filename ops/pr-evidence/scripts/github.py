@@ -28,6 +28,8 @@ def pull_request(pr: str, repo: str | None) -> dict:
     if host != "github.com":
         raise GhError(f"{data['url']} is not on github.com, the only host pr-evidence supports")
     data["repo"] = f"{owner}/{name}"
+    # GitHub's web editor stores CRLF; the section markers are matched line by line, so normalise to LF.
+    data["body"] = (data["body"] or "").replace("\r\n", "\n").replace("\r", "\n")
     return data
 
 
