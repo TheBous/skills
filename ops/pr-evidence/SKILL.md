@@ -11,13 +11,13 @@ It needs a `gh` whose `pr edit` has `--attach`, logged in with write access. Run
 
 ## Attach
 
-After the proof run, choose the screenshots that show the change: before and after when the change replaces something, phone width when layout matters. Name each file for what it shows, because the file name becomes the caption. Pass the commit you took them on:
+After the proof run, choose the screenshots that show the change: before and after when the change replaces something, phone width when layout matters. Name each file for what it shows, because the file name becomes the caption (no `[`, `]`, `\`, new lines or HTML comments). Always pass the commit you took them on:
 
 ```bash
 python3 <this-skill-dir>/scripts/pr_evidence.py attach <pr> after-desktop.png after-phone.png --head "$(git rev-parse HEAD)"
 ```
 
-Push before attaching: attach refuses when the PR head is not that commit. Pass the whole set every time, because attach replaces the section and never adds a second one. Run it again after commits that change the interface. Show the same files in your reply as images, `![caption](/absolute/path.png)`, so the user sees them without opening the PR.
+Push before attaching: attach refuses when the PR head is not that commit. Pass the whole set every time, because attach replaces the section and never adds a second one. If an upload fails, the description stays as it was: run attach again. Run it again after commits that change the interface. Show the same files in your reply as images, `![caption](/absolute/path.png)`, so the user sees them without opening the PR.
 
 ## Skip
 
@@ -37,4 +37,4 @@ Run it before handing off the PR:
 python3 <this-skill-dir>/scripts/pr_evidence.py check <pr>
 ```
 
-Exit 0: the PR changes no interface files, or the section is current. Exit 1: the message says what is missing, either no screenshots or interface commits after the ones they show. Fix it with attach or skip, never by editing the section by hand.
+Exit 0: the PR changes no interface files, or the section is current. Exit 1: the message says what is missing, either no screenshots or interface commits after the ones they show. Fix it with attach or skip, never by editing the section by hand; when the description has more than one section, they replace them all with one new section. The one manual fix: when the script reports that the `pr-evidence` start and end comments do not pair up, delete those comments, then run attach or skip.
