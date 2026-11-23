@@ -95,7 +95,7 @@ Whenever your work adds or reinforces a rule, put it at the highest level that c
 - Do not end a turn while a proof run is still in progress: wait for it and report its result. When proof needs access you lack (a login, a token, a database, an external service), ask Luca for it at once with a direct question, instead of listing it among the limitations.
 - Add new user-facing features to the skill's `features/` map and update affected journeys and proof criteria when behavior changes.
 - Review PRs read-only with `gh pr diff` or in a separate worktree, leaving Luca's working copy on its current branch.
-- An agent from a different model family than the author does the independent review.
+- An agent from a different model family than the author does the independent review: Grok 4.7 at `xhigh` reasoning, unless Luca names another model. When it is unavailable, say so and ask Luca instead of switching model.
 
 ## Reserved for Luca
 
