@@ -11,7 +11,7 @@ It needs a `gh` whose `pr edit` has `--attach`, logged in with write access. Run
 
 ## Attach
 
-After the proof run, choose the screenshots that show the change: before and after when the change replaces something, phone width when layout matters. Name each file for what it shows, because the file name becomes the caption (no `[`, `]`, `\` or new lines). Always pass the commit you took them on:
+After the proof run, choose the screenshots that show the change: before and after when the change replaces something, phone width when layout matters. Name each file for what it shows, because the file name becomes the caption (no `[`, `]`, `\`, new lines or HTML comments). Always pass the commit you took them on:
 
 ```bash
 python3 <this-skill-dir>/scripts/pr_evidence.py attach <pr> after-desktop.png after-phone.png --head "$(git rev-parse HEAD)"
@@ -37,4 +37,4 @@ Run it before handing off the PR:
 python3 <this-skill-dir>/scripts/pr_evidence.py check <pr>
 ```
 
-Exit 0: the PR changes no interface files, or the section is current. Exit 1: the message says what is missing, either no screenshots or interface commits after the ones they show. Fix it with attach or skip, never by editing the section by hand; they also merge duplicate sections into one.
+Exit 0: the PR changes no interface files, or the section is current. Exit 1: the message says what is missing, either no screenshots or interface commits after the ones they show. Fix it with attach or skip, never by editing the section by hand; when the description has more than one section, they replace them all with one new section.

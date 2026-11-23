@@ -41,7 +41,14 @@ def is_ui(path: str) -> bool:
     return Path(path).suffix in UI_SUFFIXES and not NOT_UI.search(path)
 
 
+def require_paired_markers(body: str) -> None:
+    if body.count(START) != body.count(END):
+        raise CheckFailed("the description has a broken evidence section (pr-evidence start and end comments do not pair up); "
+                          "delete those comments by hand, then run attach or skip")
+
+
 def find_section(body: str) -> str | None:
+    require_paired_markers(body)
     sections = SECTION.findall(body)
     if len(sections) > 1:
         raise CheckFailed(f"the description has {len(sections)} evidence sections; run attach or skip, which keeps one")
@@ -80,19 +87,37 @@ def put_body(pr: dict, body: str, attachments: list[Path]) -> None:
         github.edit_body(pr, Path(tmp) / "body.md", attachments)
 
 
+def confirm(pr: dict) -> None:
+    written = find_section(github.pull_request(pr["url"], None)["body"] or "") or ""
+    local = [dest for dest in IMAGE.findall(written) if not dest.startswith(UPLOADED_PREFIX)]
+    if local:
+        raise CheckFailed(f"gh did not upload {len(local)} screenshot(s)")
+    if not written or section_head(written) != pr["taken"]:
+        raise CheckFailed("the saved description does not hold the new section")
+
+
 def write(pr: dict, content: str, attachments: list[Path]) -> None:
-    """Write the section into the body as it is right now, so edits made meanwhile survive. If gh fails or leaves
-    any image unuploaded (it saves the body when at least one upload worked), put the previous body back."""
+    """Write the section into the body as it is right now, so edits made meanwhile survive. gh saves the body when at
+    least one upload worked, so after a failure put the previous body back, but only if this attempt changed it."""
     previous = github.pull_request(pr["url"], None)["body"] or ""
+    require_paired_markers(previous)
     section = f"{START}\n<!-- pr-evidence:head={pr['taken']} -->\n{content}\n{END}"
     try:
         put_body(pr, with_section(previous, section), attachments)
-        written = find_section(github.pull_request(pr["url"], None)["body"] or "") or ""
-        if any(not dest.startswith(UPLOADED_PREFIX) for dest in IMAGE.findall(written)):
-            raise CheckFailed("gh did not upload every screenshot; the description is unchanged. Run attach again")
-    except (CheckFailed, github.GhError):
-        put_body(pr, previous, [])
-        raise
+        confirm(pr)
+    except (CheckFailed, github.GhError) as error:
+        rollback(pr, previous, error)
+        raise CheckFailed(f"{error}; the description is as it was before, run attach again") from error
+
+
+def rollback(pr: dict, previous: str, error: Exception) -> None:
+    try:
+        now = github.pull_request(pr["url"], None)["body"] or ""
+        if now != previous and f"<!-- pr-evidence:head={pr['taken']} -->" in now:
+            put_body(pr, previous, [])
+    except github.GhError as failed:
+        raise CheckFailed(f"{error}; restoring the description also failed ({failed}), so it may hold a partial "
+                          f"section: run attach again") from error
 
 
 def attach(pr: dict, images: list[str]) -> str:
@@ -114,8 +139,8 @@ def attach(pr: dict, images: list[str]) -> str:
 
 
 def skip(pr: dict, reason: str) -> str:
-    if not reason.strip() or "<!--" in reason or "\n" in reason.strip():
-        raise CheckFailed("give a one-line reason, without HTML comments")
+    if not reason.strip() or "<!--" in reason or "\n" in reason.strip() or IMAGE.search(reason):
+        raise CheckFailed("give a one-line reason, without HTML comments or images")
     write(pr, f"### Screenshots\n\n{SKIPPED}{reason.strip()}", [])
     return f"recorded why {pr['url']} has no screenshots"
 
@@ -127,7 +152,9 @@ def check(pr: dict) -> str:
     section = find_section(pr["body"] or "")
     images = IMAGE.findall(section or "")
     uploaded = bool(images) and all(dest.startswith(UPLOADED_PREFIX) for dest in images)
-    if section is None or not (uploaded or (SKIPPED in section and not images)):
+    if images and not uploaded:
+        raise CheckFailed("the evidence section links images that are not uploaded to GitHub; run attach again")
+    if section is None or not (uploaded or SKIPPED in section):
         listed = ", ".join(ui[:3]) + (" ..." if len(ui) > 3 else "")
         raise CheckFailed(f"the PR changes interface files ({listed}) and its description has no screenshots. "
                           f"Run: pr_evidence.py attach {pr['number']} <screenshots>, or skip --reason when nothing visible changed")
@@ -151,9 +178,10 @@ def main() -> int:
     args = ap.parse_args()
     if (args.command == "attach") != bool(args.images) or (args.command == "skip") != (args.reason is not None):
         ap.error("attach takes images, skip takes --reason, check takes neither")
-    if args.command == "attach" and not (args.head and SHA.fullmatch(args.head)):
-        ap.error("attach needs --head with the commit the screenshots show (at least 7 hex characters)")
     try:
+        args.head = args.head.lower() if args.head else None
+        if args.command == "attach" and not (args.head and SHA.fullmatch(args.head)):
+            raise CheckFailed("attach needs --head with the commit the screenshots show (at least 7 hex characters)")
         pr = github.pull_request(args.pr, args.repo)
         head = pr["headRefOid"]
         pr["taken"] = head if not args.head or head.startswith(args.head) else args.head
