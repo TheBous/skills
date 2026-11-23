@@ -37,4 +37,4 @@ Run it before handing off the PR:
 python3 <this-skill-dir>/scripts/pr_evidence.py check <pr>
 ```
 
-Exit 0: the PR changes no interface files, or the section is current. Exit 1: the message says what is missing, either no screenshots or interface commits after the ones they show. Fix it with attach or skip, never by editing the section by hand; when the description has more than one section, they replace them all with one new section.
+Exit 0: the PR changes no interface files, or the section is current. Exit 1: the message says what is missing, either no screenshots or interface commits after the ones they show. Fix it with attach or skip, never by editing the section by hand; when the description has more than one section, they replace them all with one new section. The one manual fix: when the script reports that the `pr-evidence` start and end comments do not pair up, delete those comments, then run attach or skip.
