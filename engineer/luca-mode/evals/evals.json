@@ -9,7 +9,7 @@
       "assertions": [
         "Risponde in italiano e nomina INV-12 e /inventory",
         "Mantiene un bottone, nessun menu e il nome inventory-YYYY-MM-DD.csv",
-        "Prevede frontend-ui-engineering",
+        "Prevede senior-frontend",
         "Non impone Next.js, convenzioni Solido o un Verifier Solido senza istruzioni di progetto",
         "Prevede una prova del CSV con i prodotti filtrati"
       ]
