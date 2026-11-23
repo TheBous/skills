@@ -13,6 +13,7 @@ Reusable skills for projects.
 ## Ops
 
 - `ops/aws-impersonate/` — AWS CLI login for an IAM user with `aws login --remote` (username + password, no SSO, no CLI install), then identity check.
+- `ops/pr-evidence/` — Attach screenshots to a GitHub PR description, refresh them after new commits, and check before handoff that a PR touching UI files carries current screenshots (`attach`, `skip --reason`, `check`). Works on any github.com repo, public or private: images are uploaded with `gh pr edit --attach`, and the section records which commit they show.
 
 ## Metodo T3 Code (`/gang`)
 
