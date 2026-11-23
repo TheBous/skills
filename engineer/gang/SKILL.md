@@ -34,7 +34,7 @@ Use `effort: "high"` on Fable and Opus, not `xhigh` or `max`. Never use Astra (`
 ## Guardrails
 
 - **Child context is blank**: Every `delegate_task` child sees only `task`, never parent history. Always send a complete 7-field `BRIEF`.
-- **Builders always use `/luca-t-mode`**: Every Builder brief must instruct the builder to invoke and follow `/luca-t-mode` (the seven TheBous engineering skills, `frontend-ui-engineering` if UI, small clean commits, and real verification), while respecting the slice boundaries and stopping without merging or watching PRs. When the Lead writes code itself (hardest slice or small fixes), apply `/luca-t-mode` code and verification rules too.
+- **Builders always use `/luca-t-mode`**: Every Builder brief must instruct the builder to invoke and follow `/luca-t-mode` (the seven TheBous engineering skills, `senior-frontend` if UI, small clean commits, and real verification), while respecting the slice boundaries and stopping without merging or watching PRs. When the Lead writes code itself (hardest slice or small fixes), apply `/luca-t-mode` code and verification rules too.
 - **Permission ceiling**: A child's `runtimeMode` cannot be broader than the parent's. Omit `runtimeMode` unless Luca asks for a supervised child.
 - **Read-only is a brief rule, not a lock**: Narrow T3 modes pause for human approval rather than blocking edits. Always state `DO NOT: edit or fix anything. Report only.` in the Playtester brief.
 - **Worktrees isolate files, not runtime state**: Parallel builders share ports and local databases; coordinate test ports/DBs in `CONTEXT` when services run.
@@ -107,7 +107,7 @@ BRIEF FOR: claudeAgent / claude-opus-5-5
 ROLE: builder (develop strictly via `/luca-t-mode`)
 GOAL: <concrete slice goal>
 CONTEXT:
-- Invoke and follow `/luca-t-mode` from your first tool call (load its engineering skills, plus `frontend-ui-engineering` if touching UI, and verify against the real artifact).
+- Invoke and follow `/luca-t-mode` from your first tool call (load its engineering skills, plus `senior-frontend` if touching UI, and verify against the real artifact).
 - Spec / decisions: <summary or path to SPEC.md section>.
 - Target files to edit: <explicit list>.
 - Shared runtime constraints (if any): <ports / DB notes>.
