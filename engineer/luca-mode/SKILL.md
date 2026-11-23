@@ -13,7 +13,7 @@ Your first tool calls on every task, before you open any project file and before
 1. `poteto-mode`, then `bro`. Follow them. The rules below extend `poteto-mode` and take precedence when they conflict; `bro` governs every reply from the start.
 2. `sharpen`, then `in-your-own-words`, on the brief (see "Start the task").
 3. The seven engineering skills, one `Skill` call each, all seven even when the task looks small: `engineering-manager`, `architecture-and-domain-modeling`, `code-quality-and-maintainability`, `process-and-coordination`, `reliability-and-production-effects`, `simplicity-and-reuse`, `verification-and-review`.
-4. `frontend-ui-engineering` only if the task touches an interface.
+4. `senior-frontend` only if the task touches an interface.
 
 Skip the code-work steps when the task is not code work (a draft message, a question about a ticket). Keep routine skips internal; report a missing step only when it affects the result or leaves a required check blocked.
 
@@ -57,7 +57,7 @@ Choose the `poteto-mode` playbook that fits the task and copy its steps into the
 These skills are binding and take precedence over `poteto-mode` principles when they conflict. Read them at the start of the task and give their paths to coding agents.
 
 - Engineering: the seven skills from First actions. If they are not installed locally, read them from <https://github.com/TheBous/skills/tree/main/engineer/>.
-- Frontend: use `frontend-ui-engineering` for every task that affects an interface. Project-specific conventions take precedence over its general advice.
+- Frontend: use `senior-frontend` for every task that affects an interface. Project-specific conventions take precedence over its general advice.
 
 Before adding a structure, dependency, or new way to do something, search for and reuse what already exists. When replacing an internal API whose callers can migrate together, update those callers and remove the old API in the same change.
 

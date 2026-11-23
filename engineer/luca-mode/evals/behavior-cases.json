@@ -10,7 +10,7 @@
     "simplicity-and-reuse",
     "verification-and-review"
   ],
-  "frontend_skill": "frontend-ui-engineering",
+  "frontend_skill": "senior-frontend",
   "fixture": {
     "AGENTS.md": "# inventory-web\nReact + Vite. Run `npm test` before delivery.\n",
     "README.md": "# inventory-web\nStock management UI. `npm run dev` starts it.\n",
