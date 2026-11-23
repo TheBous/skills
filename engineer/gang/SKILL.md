@@ -108,6 +108,7 @@ ROLE: builder (develop strictly via `/luca-t-mode`)
 GOAL: <concrete slice goal>
 CONTEXT:
 - Invoke and follow `/luca-t-mode` from your first tool call (load its engineering skills, plus `senior-frontend` if touching UI, and verify against the real artifact).
+- Independent review is already assigned to the Lead's playtester (`codex` / `gpt-6.2-sol`, high): do not start another reviewer and do not ask Luca for one.
 - Spec / decisions: <summary or path to SPEC.md section>.
 - Target files to edit: <explicit list>.
 - Shared runtime constraints (if any): <ports / DB notes>.
