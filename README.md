@@ -13,3 +13,41 @@ Reusable skills for projects.
 ## Ops
 
 - `ops/aws-impersonate/` — AWS CLI login for an IAM user with `aws login --remote` (username + password, no SSO, no CLI install), then identity check.
+
+## Metodo T3 Code (`/gang`)
+
+Un solo tavolo per far lavorare più modelli insieme senza fare copia-incolla tra finestre. Le regole vivono nella skill `engineer/gang/`: non serve creare subagenti né un `TEAM.md` in ogni progetto.
+
+### 1. Ruoli
+
+| Ruolo | Modello e provider | Compito |
+| --- | --- | --- |
+| **Capo** | Claude · Fable 5.2 (`high`) | Legge il progetto, scrive il piano, aspetta il tuo ok, spezza il lavoro in fette che non si pestano i piedi, guida il giro fino alla PR |
+| **Sviluppatori** | Claude · Opus 5.5 (`high`) | Una fetta a testa in cartella separata (*worktree*), sviluppando sempre con `/luca-t-mode` |
+| **Chi prova a rompere** | Codex · GPT-6.2 Sol (`high`) | Controlla il lavoro finito da un'altra azienda (solo lettura, non modifica nulla). Mai Astra |
+| **Chi scrive i testi** | Antigravity · Gemini 4 Neon | Entra per ultimo solo su `docs/`, `README.md`, `CHANGELOG.md` e testi UI |
+
+### 2. Impostazioni del tavolo (`Settings → Threads`)
+
+- **Modello di partenza**: Opus 5.5 (`high`). Fable costa il doppio e si apre a mano solo per guidare lavori grossi.
+- **Riserva automatica**: Codex · GPT-6.2 Sol (`high`) quando Claude finisce la quota.
+- **Testi di servizio** (titoli, branch, commit, PR): Gemini 4 Neon.
+- **Ripresa sui limiti**: accendi *Resume after usage limits* e *Snooze until limits reset*.
+- **Nuovi thread**: **Worktree** (cartella e branch separati per ogni chat). Ricorda che i worktree separano i file, non le porte locali né il database.
+- **Permessi**: abbassa il default da *Full access* (usalo solo in sandbox).
+  - Un figlio non può mai avere permessi più larghi del Capo: se vuoi far lavorare i builder in *Auto*, anche la chat del Capo deve essere almeno *Auto*.
+  - Il "solo lettura" del revisore non è un blocco tecnico: vive come regola nella consegna di `/gang`.
+- **Collegamenti esterni (MCP) leggeri**: ogni chat parallela avvia la sua copia di tutti i collegamenti attivi. Tieni accesi solo quelli che servono davvero per non saturare la RAM.
+
+### 3. Flusso dal vivo
+
+1. Apri una chat su **Claude · Fable 5.2 (`high`)** (`Cmd/Ctrl + K`).
+2. Scrivi `/gang` seguito da **cosa costruire** e **come verificare che funziona**.
+3. Aspetta il piano del Capo e dai l'**ok** (prima non tocca codice).
+4. Il Capo lancia gli sviluppatori Opus in parallelo (ognuno con `/luca-t-mode`), poi manda il diff a **GPT-6.2 Sol (`high`)** per il controllo incrociato (massimo **3 giri**, poi decide Luca), e infine chiama **Gemini 4 Neon** per testi e docs.
+5. **Comandi utili mentre la squadra lavora**:
+   - **Pannello `Agents`**: mostra ogni chat figlia a fianco del Capo; se fermi il Capo si fermano tutti i figli; le richieste di conferma dei figli passano dal Capo.
+   - **`@modello`** nel messaggio: indica al Capo quale modello delegare senza cambiare quello della chat corrente.
+   - **`/goal`**: tiene l'assistente al lavoro su più turni finché il traguardo non è raggiunto (Claude, Codex, OpenCode).
+   - **`/btw`** o **`/side`**: apre una domanda laterale con tutto il contesto della chat, senza fermare il lavoro in corso.
+6. **Paletti fissi**: massimo 4 passaggi tra assistenti senza passare da te; mai toccare `.env*`, migrazioni o CI senza conferma; **merge e deploy restano sempre a Luca**.
