@@ -9,7 +9,7 @@ Reusable skills for projects.
 - `engineer/luca-mode/` — Luca's general workflow for any project. It layers his working style on `poteto-mode` and follows the project's own instructions and rules.
 - `engineer/luca-mode/evals/evals.json` — scenarios covering different project stacks and Luca's workflow boundaries.
 - `engineer/luca-mode/evals/check_luca_mode.py` — runs real prompts through `claude -p` in a throwaway copy of the fixture, then checks what luca-mode actually did, from the tool calls and the final text. It covers which skills load (`poteto-mode`, `sharpen`, `in-your-own-words`, the engineering skills, and frontend only for UI tasks), one short question or none, the playbook steps copied into the todo list, reuse of existing code, and the plain restart after "non ho capito". Cases live in `behavior-cases.json`. It loads the installed copy at `~/.agents/skills/luca-mode`, so copy the repo `SKILL.md` there before running.
-- `engineer/luca-t-mode/` — Luca's delivery workflow (`/luca-t-mode`): `full-stop` to a PR ready for his merge, the `playbook/mini-me.md` rules as code rules, `senior-frontend` for UI, small PRs in logical order, and proof on the running app with the proof level named, screenshots shown in the reply and attached to the PR through `ops/pr-evidence`.
+- `engineer/luca-t-mode/` — Luca's delivery workflow (`/luca-t-mode`): `full-stop` to a PR ready for his merge, the `playbook/mini-me.md` rules as code rules, `senior-frontend` for UI, small PRs in logical order, and proof on the running app with the proof level named, screenshots shown in the reply and the proof attached to the PR through `ops/pr-evidence`.
 
 ## Playbook
 
@@ -18,7 +18,7 @@ Reusable skills for projects.
 ## Ops
 
 - `ops/aws-impersonate/` — AWS CLI login for an IAM user with `aws login --remote` (username + password, no SSO, no CLI install), then identity check.
-- `ops/pr-evidence/` — Attach screenshots to a GitHub PR description, refresh them after new commits, and check before handoff that a PR touching UI files carries current screenshots (`attach`, `skip --reason`, `check`). Works on any github.com repo, public or private: images are uploaded with `gh pr edit --attach`, and the section records which commit they show.
+- `ops/pr-evidence/` — Attach the proof of a change to a GitHub PR description, refresh it after new commits, and check before handoff that a PR changing code carries current proof (`attach`, `skip --reason`, `check`). Proof is screenshots or text evidence: database rows, log excerpts, test tool output. Works on any github.com repo, public or private: images are uploaded with `gh pr edit --attach`, text evidence is shown inline in collapsed blocks, and the section records which commit the proof shows.
 
 ## Metodo T3 Code (`/gang`)
 
