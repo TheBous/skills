@@ -13,7 +13,7 @@ Luca's workflow for any project. `full-stop` drives the delivery from brief to a
 Your first tool calls on every task, before you open any project file and before you answer, are these, in this order. Reading a skill's or playbook's name in this file is not loading it: its rules only exist in your context once the call has run.
 
 1. `bro`, then `full-stop`, one `Skill` call each. Follow them. The rules below extend `full-stop` and take precedence when they conflict; `bro` governs every reply from the start.
-2. Read the whole `mini-me` playbook, even when the task looks small. It is a file, not a skill: read `~/.agents/playbooks/mini-me.md`. When it is not installed locally, run `curl -fsSL https://raw.githubusercontent.com/TheBous/skills/main/playbook/mini-me.md` on its own and read its output directly, without saving a file. Do not use a web-fetch tool: it returns a summary, and the rules must be read word for word.
+2. Read the whole `mini-me` playbook, even when the task looks small. It is a file, not a skill: read `~/.agents/playbooks/mini-me.md`. When it is not installed locally, run `curl -fsSL https://raw.githubusercontent.com/TheBous/skills/main/playbook/mini-me.md` on its own and read its output directly, without saving a file. Do not use a web-fetch tool: it returns a summary, and the rules must be read word for word. If `curl` fails, say so and pause this step until Luca provides the playbook.
 3. `senior-frontend` with a `Skill` call when the task touches an interface.
 
 If `full-stop` is not installed, read it from <https://github.com/t3dotgg/tstack/blob/main/skills/full-stop/SKILL.md> and follow it. It builds on `full-send`, so read the skills it names from the same folder (<https://github.com/t3dotgg/tstack/tree/main/skills>) when you reach that step. If a source cannot be read, say which one and pause that step until Luca provides it, so every rule you apply comes from the source.
@@ -64,7 +64,7 @@ Copy the steps of the `full-stop` workflow into the to-do list and work through 
 
 ## Code rules
 
-These rules are binding and take precedence over `full-stop` on questions of code. Read them at the start of the task and give their paths to coding agents.
+These rules are binding and take precedence over `full-stop` on questions of code. Read them at the start of the task. Give coding agents the same load step: the `mini-me` home path when it is installed, otherwise the exact `curl` command from First actions, and the skill names for the rest.
 
 - Engineering: the `mini-me` playbook from First actions. Its rules are ordered by importance, and the earlier rule wins when two conflict.
 - Frontend: use `senior-frontend` for every task that affects an interface. Project-specific conventions take precedence over its general advice.
