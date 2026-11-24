@@ -40,10 +40,12 @@ Reviewers read the reason. Do not use skip to avoid proof you could collect.
 
 ## Check
 
-Run it before handing off the PR:
+Run it before handing off the PR, after pushing, with the commit you pushed:
 
 ```bash
-python3 <this-skill-dir>/scripts/pr_evidence.py check <pr>
+python3 <this-skill-dir>/scripts/pr_evidence.py check <pr> --head "$(git rev-parse HEAD)"
 ```
+
+GitHub can take a few seconds to show a pushed commit, and without `--head` the check may judge the previous one. With it, the check waits for that commit and refuses when the PR head is another one.
 
 Exit 0: the PR changes only documentation or tests, or the section is current. Exit 1: the message says what is missing, either no evidence or code commits after the ones it shows. Fix it with attach or skip, never by editing the section by hand; when the description has more than one section, they replace them all with one new section. The one manual fix: when the script reports that the `pr-evidence` start and end comments do not pair up, delete those comments, then run attach or skip.

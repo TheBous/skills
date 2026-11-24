@@ -3,12 +3,12 @@
 
   pr_evidence.py attach <pr> <file>... --head SHA [--repo OWNER/NAME]
   pr_evidence.py skip <pr> --reason TEXT [--head SHA] [--repo OWNER/NAME]
-  pr_evidence.py check <pr> [--repo OWNER/NAME]
+  pr_evidence.py check <pr> [--head SHA] [--repo OWNER/NAME]
 
 <pr> is a number, URL or branch, as for `gh pr view`. A <file> is a screenshot (uploaded) or a text excerpt such as
-database rows, logs or tool output (shown inline). --head is the commit the proof shows (required by attach); attach
-and skip refuse when the PR head is another commit. A failed upload leaves the description as it was. Exit 0 on
-success, 1 when the check fails or gh errors.
+database rows, logs or tool output (shown inline). --head is the commit the proof shows (required by attach). With
+--head, every command waits a few seconds for GitHub to show that commit, then refuses when the PR head is another
+one. A failed upload leaves the description as it was. Exit 0 on success, 1 when the check fails or gh errors.
 """
 
 import argparse
@@ -17,6 +17,7 @@ from dataclasses import dataclass
 import shutil
 import sys
 import tempfile
+import time
 from pathlib import Path
 
 import github
@@ -41,6 +42,7 @@ NOT_BEHAVIOR = re.compile(r"\.(test|spec|stories)\.|(^|/)(__tests__|e2e|tests?|d
 BODY_LIMIT = 65536  # GitHub rejects longer PR descriptions
 UPLOAD_URL_ROOM = 150  # gh replaces each local image path with a longer URL
 COLUMNS = 3
+HEAD_WAIT_SECONDS, HEAD_WAIT_TRIES = 3, 10  # GitHub can take a few seconds to show a pushed commit
 
 
 class CheckFailed(Exception):
@@ -215,6 +217,17 @@ def check(pr: dict) -> str:
     return "ok: the description has current evidence or a reason for none"
 
 
+def pull_request_at(args: argparse.Namespace) -> dict:
+    """The PR as GitHub shows it, waiting briefly when --head names a commit GitHub has not shown yet."""
+    pr = github.pull_request(args.pr, args.repo)
+    for _ in range(HEAD_WAIT_TRIES):
+        if not args.head or pr["headRefOid"].startswith(args.head):
+            break
+        time.sleep(HEAD_WAIT_SECONDS)
+        pr = github.pull_request(args.pr, args.repo)
+    return pr
+
+
 def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("command", choices=["attach", "skip", "check"])
@@ -230,7 +243,7 @@ def main() -> int:
         args.head = args.head.lower() if args.head else None
         if args.command == "attach" and not (args.head and SHA.fullmatch(args.head)):
             raise CheckFailed("attach needs --head with the commit the proof shows (at least 7 hex characters)")
-        pr = github.pull_request(args.pr, args.repo)
+        pr = pull_request_at(args)
         head = pr["headRefOid"]
         pr["taken"] = head if not args.head or head.startswith(args.head) else args.head
         if pr["taken"] != pr["headRefOid"]:
