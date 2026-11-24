@@ -1,12 +1,14 @@
 #!/usr/bin/env python3
-"""Attach screenshots to a GitHub PR description and check that PRs touching the interface carry current ones.
+"""Attach proof (screenshots and text evidence) to a GitHub PR description and check that PRs changing code carry current proof.
 
-  pr_evidence.py attach <pr> <image>... --head SHA [--repo OWNER/NAME]
+  pr_evidence.py attach <pr> <file>... --head SHA [--repo OWNER/NAME]
   pr_evidence.py skip <pr> --reason TEXT [--head SHA] [--repo OWNER/NAME]
   pr_evidence.py check <pr> [--repo OWNER/NAME]
 
-<pr> is a number, URL or branch, as for `gh pr view`. --head is the commit the screenshots show (required by
-attach); attach and skip refuse when the PR head is another commit. A failed upload leaves the description as it was. Exit 0 on success, 1 when the check fails or gh errors.
+<pr> is a number, URL or branch, as for `gh pr view`. A <file> is a screenshot (uploaded) or a text excerpt such as
+database rows, logs or tool output (shown inline). --head is the commit the proof shows (required by attach); attach
+and skip refuse when the PR head is another commit. A failed upload leaves the description as it was. Exit 0 on
+success, 1 when the check fails or gh errors.
 """
 
 import argparse
@@ -18,6 +20,7 @@ import tempfile
 from pathlib import Path
 
 import github
+import text_evidence
 
 START, END = "<!-- pr-evidence:start -->", "<!-- pr-evidence:end -->"
 # Markers count only on their own line, so a mention in prose is not a section.
@@ -30,10 +33,13 @@ UPLOADED_PREFIX = "https://github.com/user-attachments/"
 SHA = re.compile(r"[0-9a-f]{7,64}")
 # A caption is the file name; these would break the markdown image or close the section early.
 UNSAFE_CAPTION = re.compile(r"[\[\]\\\r\n]|<!--|-->")
-SKIPPED = "No screenshots: "
+SKIPPED = "No evidence: "
+SKIPPED_BEFORE = "No screenshots: "  # sections written before text evidence existed
 IMAGE_SUFFIXES = {".png", ".jpg", ".jpeg", ".gif", ".webp"}
-UI_SUFFIXES = {".tsx", ".jsx", ".vue", ".svelte", ".astro", ".html", ".css", ".scss", ".sass", ".less"}
-NOT_UI = re.compile(r"\.(test|spec|stories)\.|(^|/)(__tests__|e2e|tests?)/")
+DOC_SUFFIXES = {".md", ".mdx", ".rst", ".txt"}
+NOT_BEHAVIOR = re.compile(r"\.(test|spec|stories)\.|(^|/)(__tests__|e2e|tests?|docs)/")
+BODY_LIMIT = 65536  # GitHub rejects longer PR descriptions
+UPLOAD_URL_ROOM = 150  # gh replaces each local image path with a longer URL
 COLUMNS = 3
 
 
@@ -41,8 +47,9 @@ class CheckFailed(Exception):
     pass
 
 
-def is_ui(path: str) -> bool:
-    return Path(path).suffix in UI_SUFFIXES and not NOT_UI.search(path)
+def needs_proof(path: str) -> bool:
+    """Code and assets change behavior; documentation and tests do not."""
+    return Path(path).suffix.lower() not in DOC_SUFFIXES and not NOT_BEHAVIOR.search(path)
 
 
 def require_paired_markers(body: str) -> None:
@@ -57,7 +64,7 @@ def is_complete(section: str) -> bool:
     images = IMAGE.findall(section)
     if images:
         return all(dest.startswith(UPLOADED_PREFIX) for dest in images)
-    return SKIPPED in section
+    return bool(text_evidence.BLOCK.search(section)) or SKIPPED in section or SKIPPED_BEFORE in section
 
 
 def find_section(body: str) -> str | None:
@@ -122,6 +129,9 @@ def write(pr: dict, content: str, attachments: list[Path]) -> None:
     require_paired_markers(previous)
     section = f"{START}\n<!-- pr-evidence:head={pr['taken']} -->\n{content}\n{END}"
     attempt = Attempt(previous, with_section(previous, section))
+    if len(attempt.sent) + UPLOAD_URL_ROOM * len(attachments) > BODY_LIMIT:
+        raise CheckFailed(f"the description would pass GitHub's {BODY_LIMIT}-character limit; "
+                          f"keep only the lines of text evidence that prove the change")
     try:
         put_body(pr, attempt.sent, attachments)
         confirm(pr)
@@ -154,72 +164,78 @@ def settle(pr: dict, attempt: Attempt) -> str | None:
     return "its partial section was removed and the description put back as it was"
 
 
-def attach(pr: dict, images: list[str]) -> str:
-    paths = [Path(i) for i in images]
-    bad = [str(p) for p in paths if not p.is_file() or p.suffix.lower() not in IMAGE_SUFFIXES]
+def attach(pr: dict, files: list[str]) -> str:
+    paths = [Path(f) for f in files]
+    bad = [str(p) for p in paths if not p.is_file() or not (p.suffix.lower() in IMAGE_SUFFIXES or text_evidence.is_text(p))]
     if bad:
-        raise CheckFailed(f"not an image file: {', '.join(bad)}")
+        raise CheckFailed(f"not a screenshot or text evidence file: {', '.join(bad)}")
     unsafe = [p.name for p in paths if UNSAFE_CAPTION.search(p.stem)]
     if unsafe:
         raise CheckFailed(f"rename {', '.join(unsafe)}: the file name is the caption and cannot contain [ ] \\, new lines or HTML comments")
-    if not github.supports_attach():
+    images = [p for p in paths if not text_evidence.is_text(p)]
+    try:
+        texts = [text_evidence.block(p.stem, text_evidence.read(p)) for p in paths if text_evidence.is_text(p)]
+    except text_evidence.TextEvidenceError as error:
+        raise CheckFailed(str(error)) from error
+    if images and not github.supports_attach():
         raise CheckFailed("this gh has no `gh pr edit --attach`; update gh")
     with tempfile.TemporaryDirectory() as tmp:
-        staged = [Path(tmp) / f"shot-{i}{p.suffix.lower()}" for i, p in enumerate(paths)]
-        for source, copy in zip(paths, staged):
+        staged = [Path(tmp) / f"shot-{i}{p.suffix.lower()}" for i, p in enumerate(images)]
+        for source, copy in zip(images, staged):
             shutil.copyfile(source, copy)
-        write(pr, "### Screenshots\n\n" + gallery([(p.stem, s) for p, s in zip(paths, staged)]), staged)
-    return f"attached {len(paths)} screenshots to {pr['url']} for head {pr['taken'][:10]}"
+        shots = [gallery([(p.stem, s) for p, s in zip(images, staged)])] if images else []
+        write(pr, "### Evidence\n\n" + "\n\n".join(shots + texts), staged)
+    return f"attached {len(images)} screenshots and {len(texts)} text evidence files to {pr['url']} for head {pr['taken'][:10]}"
 
 
 def skip(pr: dict, reason: str) -> str:
     if not reason.strip() or "<!--" in reason or "\n" in reason.strip() or "![" in reason:
         raise CheckFailed("give a one-line reason, without HTML comments or images")
-    write(pr, f"### Screenshots\n\n{SKIPPED}{reason.strip()}", [])
-    return f"recorded why {pr['url']} has no screenshots"
+    write(pr, f"### Evidence\n\n{SKIPPED}{reason.strip()}", [])
+    return f"recorded why {pr['url']} has no evidence"
 
 
 def check(pr: dict) -> str:
-    ui = [f for f in github.changed_files(pr) if is_ui(f)]
-    if not ui:
-        return "ok: the PR changes no interface files"
+    code = [f for f in github.changed_files(pr) if needs_proof(f)]
+    if not code:
+        return "ok: the PR changes only documentation or tests"
     section = find_section(pr["body"] or "")
     if section is not None and IMAGE.search(section) and not is_complete(section):
         raise CheckFailed("the evidence section links images that are not uploaded to GitHub; run attach again")
     if section is None or not is_complete(section):
-        listed = ", ".join(ui[:3]) + (" ..." if len(ui) > 3 else "")
-        raise CheckFailed(f"the PR changes interface files ({listed}) and its description has no screenshots. "
-                          f"Run: pr_evidence.py attach {pr['number']} <screenshots>, or skip --reason when nothing visible changed")
+        listed = ", ".join(code[:3]) + (" ..." if len(code) > 3 else "")
+        raise CheckFailed(f"the PR changes code ({listed}) and its description has no evidence. Run: pr_evidence.py "
+                          f"attach {pr['number']} <screenshots or text files>, or skip --reason when nothing observable changed")
     taken = section_head(section)
     if taken != pr["headRefOid"]:
         later = github.files_between(pr["repo"], taken, pr["headRefOid"])
-        if later is None or any(is_ui(f) for f in later):
-            raise CheckFailed(f"the screenshots show {taken[:10]} and interface files changed after it, "
-                              f"or the history was rewritten. Take new ones and run attach again")
-    return "ok: the description has current screenshots or a reason for none"
+        if later is None or any(needs_proof(f) for f in later):
+            raise CheckFailed(f"the evidence shows {taken[:10]} and code changed after it, "
+                              f"or the history was rewritten. Prove the new head and run attach again")
+    return "ok: the description has current evidence or a reason for none"
 
 
 def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("command", choices=["attach", "skip", "check"])
     ap.add_argument("pr")
-    ap.add_argument("images", nargs="*")
+    ap.add_argument("files", nargs="*")
     ap.add_argument("--repo")
     ap.add_argument("--reason")
     ap.add_argument("--head")
     args = ap.parse_args()
-    if (args.command == "attach") != bool(args.images) or (args.command == "skip") != (args.reason is not None):
-        ap.error("attach takes images, skip takes --reason, check takes neither")
+    if (args.command == "attach") != bool(args.files) or (args.command == "skip") != (args.reason is not None):
+        ap.error("attach takes files, skip takes --reason, check takes neither")
     try:
         args.head = args.head.lower() if args.head else None
         if args.command == "attach" and not (args.head and SHA.fullmatch(args.head)):
-            raise CheckFailed("attach needs --head with the commit the screenshots show (at least 7 hex characters)")
+            raise CheckFailed("attach needs --head with the commit the proof shows (at least 7 hex characters)")
         pr = github.pull_request(args.pr, args.repo)
         head = pr["headRefOid"]
         pr["taken"] = head if not args.head or head.startswith(args.head) else args.head
         if pr["taken"] != pr["headRefOid"]:
             raise CheckFailed(f"the PR head is {pr['headRefOid'][:10]}, not {pr['taken'][:10]}: prove the current head first")
-        actions = {"attach": lambda: attach(pr, args.images), "skip": lambda: skip(pr, args.reason), "check": lambda: check(pr)}
+        actions = {"attach": lambda: attach(pr, args.files), "skip": lambda: skip(pr, args.reason), "check": lambda: check(pr)}
         print(actions[args.command]())
         return 0
     except (CheckFailed, github.GhError) as error:

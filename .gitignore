@@ -1,3 +1,6 @@
 # Snapshot, benchmark outputs and review HTML generated while evaluating skills.
 # Keep the maintained eval prompts under engineer/*/evals/evals.json tracked.
 /engineer-workspace/
+
+# Python bytecode from running the skill scripts.
+__pycache__/
