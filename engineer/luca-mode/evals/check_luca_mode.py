@@ -21,8 +21,9 @@ HERE = Path(__file__).parent
 SOURCE_SUFFIXES = {".ts", ".tsx", ".js", ".jsx", ".py", ".rs", ".go", ".css"}
 PLAYBOOKS = Path("~/.agents/skills/poteto-mode").expanduser().resolve() / "playbooks"
 PREFIX = "Usa luca-mode. "
-ALLOWED = "Skill,Read,Glob,Grep,Edit,Write,TaskCreate,TaskUpdate,TaskList,TodoWrite,AskUserQuestion"
-DISALLOWED = "Bash,NotebookEdit,Agent,WebFetch,WebSearch"
+# Bash is allowed only for curl, the documented way to fetch the mini-me playbook when it is not installed.
+ALLOWED = "Skill,Read,Glob,Grep,Edit,Write,TaskCreate,TaskUpdate,TaskList,TodoWrite,AskUserQuestion,Bash(curl:*),Bash(rtk curl:*)"
+DISALLOWED = "NotebookEdit,Agent,WebFetch,WebSearch"
 
 Call = tuple[str, dict]
 
@@ -31,6 +32,7 @@ Call = tuple[str, dict]
 class Turn:
     calls: list[Call]
     text: str
+    failed: set[int]  # indices into calls whose tool result was an error or a denied permission
 
 
 @dataclass
@@ -42,19 +44,31 @@ class Run:
     def calls(self) -> list[Call]:
         return [c for t in self.turns for c in t.calls]
 
+    @property
+    def failed(self) -> set[int]:
+        offsets = [sum(len(t.calls) for t in self.turns[:i]) for i in range(len(self.turns))]
+        return {offset + i for offset, t in zip(offsets, self.turns) for i in t.failed}
 
-def parse_stream(stream: str) -> tuple[list[Call], str, str]:
-    calls, text, session = [], "", ""
+
+def parse_stream(stream: str) -> tuple[Turn, str]:
+    calls, text, session, ids, failed = [], "", "", {}, set()
     for line in stream.splitlines():
         try:
             event = json.loads(line)
         except json.JSONDecodeError:
             continue
+        message = event.get("message")
+        content = message.get("content", []) if isinstance(message, dict) else []
         if event.get("type") == "assistant":
-            calls += [(b["name"], b.get("input", {})) for b in event["message"].get("content", []) if b.get("type") == "tool_use"]
+            for block in (b for b in content if b.get("type") == "tool_use"):
+                ids[block.get("id")] = len(calls)
+                calls.append((block["name"], block.get("input", {})))
+        elif event.get("type") == "user" and isinstance(content, list):
+            failed |= {ids[b.get("tool_use_id")] for b in content
+                       if b.get("type") == "tool_result" and b.get("is_error") and b.get("tool_use_id") in ids}
         elif event.get("type") == "result":
             text, session = event.get("result", ""), event.get("session_id", "")
-    return calls, text, session
+    return Turn(calls, text, failed), session
 
 
 def run_case(case: dict, spec: dict, model: str | None, baseline: bool) -> Run:
@@ -80,8 +94,8 @@ def run_case(case: dict, spec: dict, model: str | None, baseline: bool) -> Run:
         if model:
             cmd += ["--model", model]
         proc = subprocess.run(cmd, cwd=root, env=env, capture_output=True, text=True, timeout=1200)
-        calls, text, session = parse_stream(proc.stdout)
-        turns.append(Turn(calls, text))
+        turn, session = parse_stream(proc.stdout)
+        turns.append(turn)
     return Run(root, turns)
 
 
@@ -107,16 +121,26 @@ def loaded_skills(calls: list[Call]) -> set[str]:
     return loaded
 
 
+def reads_playbook(name: str, inp: dict, playbook: str) -> bool:
+    """The local copy, or the curl fetch of the raw GitHub file."""
+    if name == "Read":
+        return inp.get("file_path", "").endswith(f"/playbooks/{playbook}.md")
+    return name == "Bash" and f"playbook/{playbook}.md" in inp.get("command", "")
+
+
 def check_skills(run: Run, check: dict, spec: dict) -> dict[str, bool]:
     calls = run.calls
     loaded = loaded_skills(calls)
-    results = {f"loads {s}": s in loaded for s in spec["always_skills"] + spec["engineering_skills"]}
+    results = {f"loads {s}": s in loaded for s in spec["always_skills"]}
     frontend = spec["frontend_skill"]
     results[f"{'loads' if check['ui'] else 'skips'} {frontend}"] = (frontend in loaded) == check["ui"]
     names = [skill_name(i) if n == "Skill" else None for n, i in calls]
     code_read = next((i for i, (n, inp) in enumerate(calls) if n == "Read" and Path(inp.get("file_path", "")).suffix in SOURCE_SUFFIXES), None)
     for s in ("sharpen", "in-your-own-words"):
         results[f"{s} before first code file"] = s in names and (code_read is None or names.index(s) < code_read)
+    playbook = spec["code_rules_playbook"]
+    read_at = next((i for i, (n, inp) in enumerate(calls) if reads_playbook(n, inp, playbook) and i not in run.failed), None)
+    results[f"reads {playbook} before first code file"] = read_at is not None and (code_read is None or read_at < code_read)
     return results
 
 

@@ -1,15 +1,7 @@
 {
   "skill_name": "luca-mode",
   "always_skills": ["luca-mode", "poteto-mode", "sharpen", "in-your-own-words"],
-  "engineering_skills": [
-    "engineering-manager",
-    "architecture-and-domain-modeling",
-    "code-quality-and-maintainability",
-    "process-and-coordination",
-    "reliability-and-production-effects",
-    "simplicity-and-reuse",
-    "verification-and-review"
-  ],
+  "code_rules_playbook": "mini-me",
   "frontend_skill": "senior-frontend",
   "fixture": {
     "AGENTS.md": "# inventory-web\nReact + Vite. Run `npm test` before delivery.\n",

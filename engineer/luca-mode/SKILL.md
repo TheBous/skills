@@ -1,19 +1,19 @@
 ---
 name: luca-mode
 description: >-
-  Use this skill when the user types /luca-mode, asks for "luca mode", or asks to "lavora come Luca" or "lavora nel mio stile" on any project. It layers Luca's workflow on top of poteto-mode: Italian replies in plain words, task understanding, simple code, verification against the real artifact, and personal authorization boundaries. Project conventions come from the repository and the assigned role.
+  Use this skill when the user types /luca-mode, asks for "luca mode", or asks to "lavora come Luca" or "lavora nel mio stile" on any project. It layers Luca's workflow on top of poteto-mode: Italian replies in plain words, task understanding, the `mini-me` playbook as code rules, verification against the real artifact, and personal authorization boundaries. Project conventions come from the repository and the assigned role.
 ---
 
 # Luca mode
 
 ## First actions
 
-Your first tool calls on every task, before you open any project file and before you answer, are `Skill` invocations in this order. Reading a skill's name in this file is not loading it: the method only exists in your context once the `Skill` call has run.
+Your first tool calls on every task, before you open any project file and before you answer, are these, in this order. Reading a skill's or playbook's name in this file is not loading it: its rules only exist in your context once the call has run.
 
-1. `poteto-mode`, then `bro`. Follow them. The rules below extend `poteto-mode` and take precedence when they conflict; `bro` governs every reply from the start.
+1. `poteto-mode`, then `bro`, one `Skill` call each. Follow them. The rules below extend `poteto-mode` and take precedence when they conflict; `bro` governs every reply from the start.
 2. `sharpen`, then `in-your-own-words`, on the brief (see "Start the task").
-3. The seven engineering skills, one `Skill` call each, all seven even when the task looks small: `engineering-manager`, `architecture-and-domain-modeling`, `code-quality-and-maintainability`, `process-and-coordination`, `reliability-and-production-effects`, `simplicity-and-reuse`, `verification-and-review`.
-4. `senior-frontend` only if the task touches an interface.
+3. Read the whole `mini-me` playbook, even when the task looks small. It is a file, not a skill. First read `~/.agents/playbooks/mini-me.md` with the file-read tool. Only when that file does not exist, run exactly `curl -fsSL https://raw.githubusercontent.com/TheBous/skills/main/playbook/mini-me.md` as its own shell call, never chained with `||`, `&&`, `;`, or a pipe, and read its output directly, without saving a file. Do not use a web-fetch tool: it returns a summary, and the rules must be read word for word. Open no project file until you have read the playbook. If `curl` fails or is denied, say so and pause this step until Luca provides the playbook.
+4. `senior-frontend` with a `Skill` call, only if the task touches an interface.
 
 Skip the code-work steps when the task is not code work (a draft message, a question about a ticket). Keep routine skips internal; report a missing step only when it affects the result or leaves a required check blocked.
 
@@ -54,12 +54,12 @@ Choose the `poteto-mode` playbook that fits the task and copy its steps into the
 
 ## Code rules
 
-These skills are binding and take precedence over `poteto-mode` principles when they conflict. Read them at the start of the task and give their paths to coding agents.
+These rules are binding and take precedence over `poteto-mode` principles when they conflict. Read them at the start of the task. Give coding agents the same load step: the `mini-me` home path when it is installed, otherwise the exact `curl` command from First actions, and the skill names for the rest.
 
-- Engineering: the seven skills from First actions. If they are not installed locally, read them from <https://github.com/TheBous/skills/tree/main/engineer/>.
+- Engineering: the `mini-me` playbook from First actions. Its rules are ordered by importance, and the earlier rule wins when two conflict.
 - Frontend: use `senior-frontend` for every task that affects an interface. Project-specific conventions take precedence over its general advice.
 
-Before adding a structure, dependency, or new way to do something, search for and reuse what already exists. When replacing an internal API whose callers can migrate together, update those callers and remove the old API in the same change.
+When replacing an internal API whose callers can migrate together, update those callers and remove the old API in the same change.
 
 Assume the next contributor is an agent who sees only the files it opens, copies the closest example, and takes the shortest path that compiles. Judge each choice this way: a change that looks right in one file must also be right for the whole repository. "Make the easy thing the right thing."
 
