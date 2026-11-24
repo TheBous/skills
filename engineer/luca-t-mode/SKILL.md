@@ -1,20 +1,20 @@
 ---
 name: luca-t-mode
 description: >-
-  Use this skill when the user types /luca-t-mode, asks for "luca t mode", or asks to "lavora come Luca con full-stop" on any project. It is Luca's development workflow: delivery driven by `full-stop`, the seven TheBous engineering skills as code rules, Italian replies in plain words, small PRs in logical order, verification on the running application, and a PR left ready for Luca to merge. Project conventions come from the repository and the assigned role.
+  Use this skill when the user types /luca-t-mode, asks for "luca t mode", or asks to "lavora come Luca con full-stop" on any project. It is Luca's development workflow: delivery driven by `full-stop`, the `mini-me` playbook as code rules, Italian replies in plain words, small PRs in logical order, verification on the running application, and a PR left ready for Luca to merge. Project conventions come from the repository and the assigned role.
 ---
 
 # Luca T mode
 
-Luca's workflow for any project. `full-stop` drives the delivery from brief to a ready PR, the seven TheBous engineering skills set the code rules, and Luca does the merge.
+Luca's workflow for any project. `full-stop` drives the delivery from brief to a ready PR, the `mini-me` playbook sets the code rules, and Luca does the merge.
 
 ## First actions
 
-Your first tool calls on every task, before you open any project file and before you answer, are `Skill` invocations in this order. Reading a skill's name in this file is not loading it: the method only exists in your context once the `Skill` call has run.
+Your first tool calls on every task, before you open any project file and before you answer, are these, in this order. Reading a skill's or playbook's name in this file is not loading it: its rules only exist in your context once the call has run.
 
-1. `bro`, then `full-stop`. Follow them. The rules below extend `full-stop` and take precedence when they conflict; `bro` governs every reply from the start.
-2. The seven engineering skills, one `Skill` call each, all seven even when the task looks small: `engineering-manager`, `architecture-and-domain-modeling`, `code-quality-and-maintainability`, `process-and-coordination`, `reliability-and-production-effects`, `simplicity-and-reuse`, `verification-and-review`.
-3. `senior-frontend` when the task touches an interface.
+1. `bro`, then `full-stop`, one `Skill` call each. Follow them. The rules below extend `full-stop` and take precedence when they conflict; `bro` governs every reply from the start.
+2. Read the whole `mini-me` playbook, even when the task looks small. It is a file, not a skill: read `~/.agents/playbooks/mini-me.md`, or fetch <https://raw.githubusercontent.com/TheBous/skills/main/playbook/mini-me.md> when it is not installed locally.
+3. `senior-frontend` with a `Skill` call when the task touches an interface.
 
 If `full-stop` is not installed, read it from <https://github.com/t3dotgg/tstack/blob/main/skills/full-stop/SKILL.md> and follow it. It builds on `full-send`, so read the skills it names from the same folder (<https://github.com/t3dotgg/tstack/tree/main/skills>) when you reach that step. If a source cannot be read, say which one and pause that step until Luca provides it, so every rule you apply comes from the source.
 
@@ -64,12 +64,12 @@ Copy the steps of the `full-stop` workflow into the to-do list and work through 
 
 ## Code rules
 
-These skills are binding and take precedence over `full-stop` on questions of code. Read them at the start of the task and give their paths to coding agents.
+These rules are binding and take precedence over `full-stop` on questions of code. Read them at the start of the task and give their paths to coding agents.
 
-- Engineering: the seven skills from First actions. If they are not installed locally, read them from <https://github.com/TheBous/skills/tree/main/engineer/>.
+- Engineering: the `mini-me` playbook from First actions. Its rules are ordered by importance, and the earlier rule wins when two conflict.
 - Frontend: use `senior-frontend` for every task that affects an interface. Project-specific conventions take precedence over its general advice.
 
-Before adding a structure, dependency, or new way to do something, search for what already exists and reuse it. When replacing an internal API whose callers can migrate together, update those callers and remove the old API in the same change.
+When replacing an internal API whose callers can migrate together, update those callers and remove the old API in the same change.
 
 Assume the next contributor is an agent who sees only the files it opens, copies the closest example, and takes the shortest path that compiles. Judge each choice this way: a change that looks right in one file is also right for the whole repository. "Make the easy thing the right thing."
 
