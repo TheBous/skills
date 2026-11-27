@@ -3,8 +3,9 @@ name: gang
 description: >-
   Orchestrate a multi-model engineering team in T3 Code using `delegate_task`:
   Fable 5.2 as lead, Opus 5.5 builders developing via `/luca-t-mode` in isolated
-  worktrees, GPT-6.2 Sol (high) as read-only cross-family playtester, and Gemini 4 Neon
-  as copywriter. Use only when the user explicitly invokes `/gang` or asks to run
+  worktrees, GPT-6.2 Sol (high) as read-only cross-family playtester and then as
+  read-only code-quality reviewer (`$thermo-nuclear-code-quality-review`), and
+  Gemini 4 Neon as copywriter. Use only when the user explicitly invokes `/gang` or asks to run
   a task with the multi-model T3 team ("gang"). Never invoke automatically on
   small single-agent tasks.
 ---
@@ -27,6 +28,7 @@ Call `orchestrator_capabilities` once per thread before the first `delegate_task
 | **Lead** | Current thread (ideally `claudeAgent`) | `claude-fable-5-2` | `effort: "high"` | Main / lead branch | Read repo, write spec, wait for Luca's approval, split disjoint slices, take hardest slice if appropriate, coordinate review & copy, hand off ready PR |
 | **Builders** | `claudeAgent` | `claude-opus-5-5` | `effort: "high"` | `worktree` | One disjoint slice per builder, always developing via `/luca-t-mode` |
 | **Playtester** | `codex` | `gpt-6.2-sol` | `reasoningEffort: "high"` | `shared` | Cross-family adversarial review and edge-case testing. Strictly read-only by brief |
+| **Quality reviewer** | `codex` | `gpt-6.2-sol` | `reasoningEffort: "high"` | `shared` | Runs after the Playtest: strict code-quality review via `$thermo-nuclear-code-quality-review`. Strictly read-only by brief |
 | **Copywriter** | `antigravity` | `gemini-4-neon` | default | `worktree` (or final branch) | Last step: `docs/`, `README.md`, `CHANGELOG.md`, and UI copy / i18n only |
 
 Use `effort: "high"` on Fable and Opus, not `xhigh` or `max`. Never use Astra (`gpt-6.2-astra` or any Astra variant); always use `codex` / `gpt-6.2-sol` with `reasoningEffort: "high"`.
@@ -37,9 +39,11 @@ Use `effort: "high"` on Fable and Opus, not `xhigh` or `max`. Never use Astra (`
 - **Builders always use `/luca-t-mode`**: Every Builder brief must instruct the builder to invoke and follow `/luca-t-mode` (the `mini-me` playbook as code rules, `senior-frontend` if UI, small clean commits, and real verification), while respecting the slice boundaries and stopping without merging or watching PRs. When the Lead writes code itself (hardest slice or small fixes), apply `/luca-t-mode` code and verification rules too.
 - **Permission ceiling**: A child's `runtimeMode` cannot be broader than the parent's. Omit `runtimeMode` unless Luca asks for a supervised child.
 - **Read-only is a brief rule, not a lock**: Narrow T3 modes pause for human approval rather than blocking edits. Always state `DO NOT: edit or fix anything. Report only.` in the Playtester brief.
+- **Quality reviewer uses the Playtester's model**: Always delegate the code-quality review to the same provider, model, and options as the Playtester (`codex` / `gpt-6.2-sol`, `reasoningEffort: "high"`), so both reviews come from the cross-family reviewer. Its brief also states `DO NOT: edit or fix anything. Report only.`; the only files it may write are its report files under `/tmp/`.
 - **Worktrees isolate files, not runtime state**: Parallel builders share ports and local databases; coordinate test ports/DBs in `CONTEXT` when services run.
 - **Hard limits**:
   - Max **3 review rounds** with the Playtester; if issues remain after round 3, stop and escalate to Luca.
+  - Max **3 review rounds** with the Quality reviewer, counted separately from the Playtester rounds; if blockers remain after round 3, stop and escalate to Luca.
   - Max **4 agent-to-agent handoffs** without checking in with Luca.
   - Never touch `.env*`, database migrations, or CI/CD config without Luca's explicit approval.
   - **Merging, deploying, and pushes to the default branch stay with Luca.** Disable auto-merge and leave PRs open and ready.
@@ -76,13 +80,20 @@ Execute these steps in order:
    - Fix small confirmed findings yourself; delegate larger fixes to an Opus builder (`claude-opus-5-5` with `/luca-t-mode`).
    - Re-check fixes with a fresh Playtester `delegate_task`. Stop after round 3 and report unresolved items to Luca.
 
-5. **Delegate Copywriter last (when applicable)**
+5. **Run the code-quality review (max 3 rounds)**
+   - Start only after the Playtest is closed (clean, or unresolved items already reported to Luca), so the quality review reads code whose behavior is settled.
+   - Delegate a read-only review to the same model as the Playtester: `codex` / `gpt-6.2-sol` (`options: { reasoningEffort: "high" }`, `role: "review"`), using the Quality reviewer brief below. Send the task, spec, and combined diff, not your own conclusions or the Playtester's findings, so the review stays independent.
+   - The review applies `$thermo-nuclear-code-quality-review`: structure, missed simplifications, spaghetti branching, type boundaries, files pushed past 1000 lines. Behavior must not change.
+   - Fix presumptive blockers that fit the approved spec and slice ownership: small ones yourself, larger ones through an Opus builder (`claude-opus-5-5` with `/luca-t-mode`). A restructuring that goes beyond the approved spec or file ownership is Luca's call: report it with the reviewer's proposal instead of doing it.
+   - After every fix, rerun the project's verification checks so the refactor is proven not to change behavior, then re-check with a fresh Quality reviewer `delegate_task` that includes the prior findings. Stop after round 3 and report unresolved items to Luca.
+
+6. **Delegate Copywriter last (when applicable)**
    - Skip this step if the change has no user-facing strings, docs, README, or changelog updates.
    - Delegate to `antigravity` / `gemini-4-neon` (`role: "implementation"`) with the spec and final diff, restricted strictly to documentation and UI copy paths.
 
-6. **Hand off to Luca**
+7. **Hand off to Luca**
    - Confirm tests, verification on the real artifact, and PR readiness (open, unmerged, auto-merge off).
-   - Report in plain Italian (`/bro` style): slices and owners, PR link and head SHA, verification evidence, Playtester verdict and rounds used, copy changes, and remaining risks.
+   - Report in plain Italian (`/bro` style): slices and owners, PR link and head SHA, verification evidence, Playtester verdict and rounds used, Quality reviewer verdict, rounds used, and path of its summary report, copy changes, and remaining risks.
 
 ## Mandatory 7-field BRIEF format
 
@@ -90,7 +101,7 @@ Every `delegate_task` prompt must include all seven fields:
 
 ```text
 BRIEF FOR: <providerInstanceId / model>
-ROLE: <builder | playtester | copywriter>
+ROLE: <builder | playtester | quality reviewer | copywriter>
 GOAL: <single concrete outcome>
 CONTEXT: <exact file paths, architectural decisions, spec or diff reference>
 DONE WHEN: <verifiable command, test, or check>
@@ -108,7 +119,7 @@ ROLE: builder (develop strictly via `/luca-t-mode`)
 GOAL: <concrete slice goal>
 CONTEXT:
 - Invoke and follow `/luca-t-mode` from your first tool call (read its `mini-me` playbook, plus `senior-frontend` if touching UI, and verify against the real artifact).
-- Independent review is already assigned to the Lead's playtester (`codex` / `gpt-6.2-sol`, high): do not start another reviewer and do not ask Luca for one.
+- Independent reviews are already assigned by the Lead to `codex` / `gpt-6.2-sol` (high): the playtest, then the code-quality review. Do not start another reviewer and do not ask Luca for one.
 - Spec / decisions: <summary or path to SPEC.md section>.
 - Target files to edit: <explicit list>.
 - Shared runtime constraints (if any): <ports / DB notes>.
@@ -138,6 +149,28 @@ CONTEXT:
 DONE WHEN: You have checked the diff and tested edge cases relevant to the change: empty input, huge input, concurrent actions / two tabs, slow or failed network, unicode (e.g. "Piña"), expired auth, missing permissions, and domain invariants.
 DO NOT: Edit, fix, commit, or write any code. Report only.
 RETURN: Numbered list of findings. For each: severity (1=blocker, 2=major, 3=minor), repro steps, expected behavior, actual behavior, and file:line reference. If clean, state explicitly what you checked and found passing.
+```
+
+### Quality reviewer (`codex` / `gpt-6.2-sol`, `reasoningEffort: "high"`)
+
+Same provider, model, and options as the Playtester.
+
+```text
+BRIEF FOR: codex / gpt-6.2-sol (reasoningEffort: high)
+ROLE: quality reviewer (read-only)
+GOAL: Run a strict code-quality review of this change with `$thermo-nuclear-code-quality-review` and find the structural problems worth fixing before merge.
+CONTEXT:
+- Invoke and follow `$thermo-nuclear-code-quality-review` from your first step (installed in `~/.agents/skills/`). If you cannot load it, stop and say so instead of reviewing from memory.
+- Task & acceptance test: <summary>.
+- Spec and slice file ownership: <summary or path to SPEC.md>.
+- Diff / branch to inspect: <diff or branch/commit range>.
+- Prior round findings (rounds 2-3 only): <list>.
+DONE WHEN: Every changed file has been judged against the skill's approval bar, and each finding names the evidence (file:line, line counts for files near 1000 lines) and a behavior-preserving remedy.
+DO NOT: Edit, fix, commit, or write any code in the repository. The only files you may write are the skill's report files under `/tmp/<repo>-thermo/`. Do not re-test runtime behavior; the Playtester already covered it.
+RETURN:
+- Verdict: approve, or not approved with the blockers.
+- Numbered list of findings, most severe first. For each: severity (1=presumptive blocker, 2=major, 3=minor), file:line, the problem, the proposed remedy, and whether the remedy stays inside the spec's file ownership.
+- Path of the summary report and detail files.
 ```
 
 ### Copywriter (`antigravity` / `gemini-4-neon`)
